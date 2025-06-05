@@ -7,7 +7,7 @@ const EmployeeDashboard = () => {
 
   useEffect(() => {
     const id = localStorage.getItem("employee_id");
-    axios.get(`http://localhost:3000/auth/employee/${id}`)
+    axios.get(`http://localhost:3000/employee/${id}`)
       .then(res => {
         console.log(res.data);
         if (res.data.Status) setEmployee(res.data.Result);
@@ -37,15 +37,7 @@ const EmployeeDashboard = () => {
             </div>
             
             <ul className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100">
-              {/* <li className="w-100">
-                <Link
-                  to={`/employee_dashboard/edit`}
-                  className="nav-link text-white px-0 align-middle"
-                >
-                  <i className="fs-4 bi-pencil-square ms-2"></i>
-                  <span className="ms-2 d-none d-sm-inline">Edit Profile</span>
-                </Link>
-              </li> */}
+             
               <li className="w-100 mt-2">
                 <Link
                   to="/"

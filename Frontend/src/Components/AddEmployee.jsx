@@ -13,6 +13,8 @@ const AddEmployee = () => {
     salary: "",
     address: "",
     dept_id: "",
+    designation: "",      // Added for Office Details
+    experience: "",       // Added for Office Details
     image: "",
     age: "",
     gender: "",
@@ -20,13 +22,14 @@ const AddEmployee = () => {
     bank_name: "",
     branch: "",
     university: "",
-    degree: "",        // Added
-    edu_branch: "",    // Added
-    grade: "",         // Added
+    degree: "",
+    edu_branch: "",
+    gradepoint: "",
     yop: "",
     father_name: "",
     mother_name: "",
     emergency_contact: "",
+    alternate_contact: "", // Added for Emergency Contacts
     aadhar_number: "",
     pan_number: ""
   });
@@ -68,15 +71,17 @@ const AddEmployee = () => {
     formData.append("salary", employee.salary);
     formData.append("image", employee.image);
     formData.append("dept_id", Number(employee.dept_id));
+    formData.append("designation", employee.designation); // Office Details
+    formData.append("experience", employee.experience);   // Office Details
     formData.append("age", employee.age);
     formData.append("gender", employee.gender);
     formData.append("account_no", employee.account_no);
     formData.append("bank_name", employee.bank_name);
     formData.append("branch", employee.branch);
     formData.append("university", employee.university);
-    formData.append("degree", employee.degree);         // Added
-    formData.append("edu_branch", employee.edu_branch); // Added
-    formData.append("grade", employee.grade);           // Added
+    formData.append("degree", employee.degree);
+    formData.append("edu_branch", employee.edu_branch);
+    formData.append("gradepoint", employee.gradepoint);
     formData.append("yop", employee.yop);
 
     // Optional fields: send as "" if blank
@@ -85,6 +90,7 @@ const AddEmployee = () => {
     formData.append("pan_number", employee.pan_number || "");
 
     formData.append("emergency_contact", employee.emergency_contact);
+    formData.append("alternate_contact", employee.alternate_contact); // Emergency Contacts
     formData.append("aadhar_number", employee.aadhar_number);
 
     axios
@@ -138,16 +144,7 @@ const AddEmployee = () => {
                 onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
               />
             </div>
-            <div className="mb-3">
-              <label className="form-label">Salary</label>
-              <input
-                type="number"
-                className="form-control"
-                required
-                value={employee.salary}
-                onChange={(e) => setEmployee({ ...employee, salary: e.target.value })}
-              />
-            </div>
+            
             <div className="mb-3">
               <label className="form-label">Address</label>
               <input
@@ -244,6 +241,40 @@ const AddEmployee = () => {
             </div>
           </div>
 
+          {/* Office Details */}
+          <div className="col-md-6">
+            <h5>Office Details</h5>
+            <div className="mb-3">
+              <label className="form-label">Designation</label>
+              <input
+                type="text"
+                className="form-control"
+                value={employee.designation}
+                onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Experience</label>
+              <input
+                type="text"
+                className="form-control"
+                value={employee.experience}
+                onChange={(e) => setEmployee({ ...employee, experience: e.target.value })}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Salary</label>
+              <input
+                type="number"
+                className="form-control"
+                required
+                value={employee.salary}
+                onChange={(e) => setEmployee({ ...employee, salary: e.target.value })}
+              />
+            </div>
+          </div>
+
           {/* Education Details */}
           <div className="col-md-6">
             <h5>Education Details</h5>
@@ -275,12 +306,12 @@ const AddEmployee = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Grade</label>
+              <label className="form-label">Gradepoint</label>
               <input
                 type="text"
                 className="form-control"
-                value={employee.grade}
-                onChange={(e) => setEmployee({ ...employee, grade: e.target.value })}
+                value={employee.gradepoint}
+                onChange={(e) => setEmployee({ ...employee, gradepoint: e.target.value })}
               />
             </div>
             <div className="mb-3">
@@ -329,6 +360,16 @@ const AddEmployee = () => {
                 pattern="[0-9]{10}"
                 value={employee.emergency_contact}
                 onChange={(e) => setEmployee({ ...employee, emergency_contact: e.target.value })}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Alternate Contact</label>
+              <input
+                type="tel"
+                className="form-control"
+                pattern="[0-9]{10}"
+                value={employee.alternate_contact}
+                onChange={(e) => setEmployee({ ...employee, alternate_contact: e.target.value })}
               />
             </div>
           </div>

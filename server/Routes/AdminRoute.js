@@ -7,12 +7,19 @@ import path from "path";
 
 const router = express.Router();
 
-bcrypt.hash('12345', 10, (err, hash) => {
-  console.log(hash);
+// Image Upload Configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'Public/Images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname));
+  }
 });
 
+const upload = multer({ storage: storage });
 
-// Admin Login with Password Hashing
+// Admin Login
 router.post("/adminlogin", (req, res) => {
   const sql = "SELECT * FROM admin WHERE email = ?";
   con.query(sql, [req.body.email], (err, result) => {
@@ -63,24 +70,12 @@ router.post('/add_dept', (req, res) => {
   });
 });
 
-// Image Upload Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'Public/Images');
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
-
-// Employee Management Routes
+// Employee Management Routes (Updated with all fields)
 router.post('/add_employee', upload.single('image'), (req, res) => {
   const sql = `INSERT INTO employee 
-    (name, email, password, address, salary, image, dept_id,
-     age, gender, account_no, bank_name, branch, university, yop,
-     father_name, mother_name, emergency_contact) 
+    (name, email, password, address, salary, image, dept_id, age, gender,
+     account_no, bank_name, branch, university, yop, father_name, mother_name,
+     emergency_contact,alternate_contact,aadhar_number, pan_number, degree, edu_branch, gradepoint) 
     VALUES (?)`;
 
   bcrypt.hash(req.body.password, 10, (err, hash) => {
@@ -105,7 +100,14 @@ router.post('/add_employee', upload.single('image'), (req, res) => {
       req.body.yop,
       req.body.father_name,
       req.body.mother_name,
-      req.body.emergency_contact
+      req.body.emergency_contact,
+      req.body.alternate_contact,
+      
+      req.body.aadhar_number,  // Added
+      req.body.pan_number,     // Added
+      req.body.degree,         // Added
+      req.body.edu_branch,     // Added
+      req.body.gradepoint           // Added
     ];
 
     con.query(sql, [values], (err, result) => {
@@ -114,6 +116,50 @@ router.post('/add_employee', upload.single('image'), (req, res) => {
     });
   });
 });
+
+// Updated Edit Employee Route
+router.put('/edit_employee/:id', upload.single('image'), (req, res) => {
+  const id = req.params.id;
+  const sql = `UPDATE employee 
+    SET name = ?, email = ?, salary = ?, address = ?, dept_id = ?,
+        age = ?, gender = ?, account_no = ?, bank_name = ?, branch = ?,
+        university = ?, yop = ?, father_name = ?, mother_name = ?,
+        emergency_contact = ?, aadhar_number = ?, pan_number = ?,
+        degree = ?, edu_branch = ?, gradepoint = ?
+    WHERE id = ?`;
+  
+  const values = [
+    req.body.name,
+    req.body.email,
+    req.body.salary,
+    req.body.address,
+    req.body.dept_id,
+    req.body.age,
+    req.body.gender,
+    req.body.account_no,
+    req.body.bank_name,
+    req.body.branch,
+    req.body.university,
+    req.body.yop,
+    req.body.father_name,
+    req.body.mother_name,
+    req.body.emergency_contact,
+    req.body.aadhar_number,  // Added
+    req.body.pan_number,     // Added
+    req.body.degree,         // Added
+    req.body.edu_branch,     // Added
+    req.body.gradepoint,          // Added
+    id
+  ];
+
+  con.query(sql, values, (err, result) => {
+    if(err) return res.json({ Status: false, Error: "Query Error: " + err });
+    return res.json({ Status: true, Result: result });
+  });
+});
+
+// Rest of the routes remain the same as your original code
+// (employee get routes, dashboard stats, logout, etc.)
 
 router.get('/employee', (req, res) => {
   const sql = `
@@ -150,49 +196,6 @@ router.get('/employee/:id', (req, res) => {
   });
 });
 
-router.put('/edit_employee/:id', (req, res) => {
-  const id = req.params.id;
-  const sql = `UPDATE employee 
-    SET name = ?, email = ?, salary = ?, address = ?, dept_id = ?,
-        age = ?, gender = ?, account_no = ?, bank_name = ?, branch = ?,
-        university = ?, yop = ?, father_name = ?, mother_name = ?,
-        emergency_contact = ?
-    WHERE id = ?`;
-  
-  const values = [
-    req.body.name,
-    req.body.email,
-    req.body.salary,
-    req.body.address,
-    req.body.dept_id,
-    req.body.age,
-    req.body.gender,
-    req.body.account_no,
-    req.body.bank_name,
-    req.body.branch,
-    req.body.university,
-    req.body.yop,
-    req.body.father_name,
-    req.body.mother_name,
-    req.body.emergency_contact,
-    id
-  ];
-
-  con.query(sql, values, (err, result) => {
-    if(err) return res.json({ Status: false, Error: "Query Error: " + err });
-    return res.json({ Status: true, Result: result });
-  });
-});
-
-router.delete('/delete_employee/:id', (req, res) => {
-  const id = req.params.id;
-  const sql = "DELETE FROM employee WHERE id = ?";
-  con.query(sql, [id], (err, result) => {
-    if(err) return res.json({ Status: false, Error: "Query Error: " + err });
-    return res.json({ Status: true, Result: result });
-  });
-});
-
 // Dashboard Statistics
 router.get('/admin_count', (req, res) => {
   const sql = "SELECT COUNT(id) AS admin FROM admin";
@@ -221,10 +224,11 @@ router.get('/salary_count', (req, res) => {
 router.get('/admin_records', (req, res) => {
   const sql = "SELECT * FROM admin";
   con.query(sql, (err, result) => {
-    if(err) return res.json({ Status: false, Error: "Query Error: " + err });
+    if (err) return res.json({ Status: false, Error: "Query Error: " + err });
     return res.json({ Status: true, Result: result });
   });
 });
+
 
 router.get('/logout', (req, res) => {
   res.clearCookie('token');

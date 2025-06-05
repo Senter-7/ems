@@ -43,20 +43,7 @@ const EmployeeDetail = () => {
   return (
     <div className="container">
       <div className='d-flex justify-content-center flex-column align-items-center mt-3'>
-        {employee.image ? (
-          <img
-            src={`http://localhost:3000/Images/${employee.image}`}
-            className='emp_det_image rounded-circle'
-            alt="Employee"
-            style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "50%" }}
-          />
-        ) : (
-          <div className='emp_det_image placeholder-image' style={{
-            width: "120px", height: "120px", borderRadius: "50%", background: "#eee", display: "flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <span>No Image</span>
-          </div>
-        )}
+        
 
         <div className='w-75 mt-4'>
           {/* Personal Details Card */}
@@ -73,9 +60,9 @@ const EmployeeDetail = () => {
                 <p><strong>Gender:</strong> {employee.gender}</p>
               </div>
               <div className='col-md-6'>
-                <p><strong>Salary:</strong> ₹{employee.salary}</p>
+                
                 <p><strong>Address:</strong> {employee.address}</p>
-                <p><strong>Department:</strong> {dept}</p>
+                
               </div>
             </div>
           </div>
@@ -96,6 +83,24 @@ const EmployeeDetail = () => {
             </div>
           </div>
 
+{/* Office Details Card */}
+          <div className='card shadow mb-4'>
+            <div className='card-header bg-success text-white'>
+              <h4>Office Details</h4>
+            </div>
+            <div className='card-body row'>
+              <div className='col-md-6'>
+                <p><strong>Department:</strong> {dept}</p>
+                <p><strong>Designation:</strong> {dept}</p>
+                
+              </div>
+              <div className='col-md-6'>
+                <p><strong>Experience:</strong> {dept}</p>
+                <p><strong>Salary:</strong> ₹{employee.salary}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Education Details Card */}
           <div className='card shadow mb-4'>
             <div className='card-header bg-info text-white'>
@@ -108,7 +113,7 @@ const EmployeeDetail = () => {
                 <p><strong>Branch:</strong> {employee.edu_branch || "N/A"}</p>
               </div>
               <div className='col-md-6'>
-                <p><strong>Grade:</strong> {employee.grade || "N/A"}</p>
+                <p><strong>gradepoint:</strong> {employee.gradepoint || "N/A"}</p>
                 <p><strong>Year of Passing:</strong> {employee.yop}</p>
               </div>
             </div>
@@ -125,7 +130,9 @@ const EmployeeDetail = () => {
                 <p><strong>Mother's Name:</strong> {employee.mother_name || "N/A"}</p>
               </div>
               <div className='col-md-6'>
+                <p><strong>Alternate Contact:</strong> {employee.alternate_contact}</p>
                 <p><strong>Emergency Contact:</strong> {employee.emergency_contact}</p>
+                
               </div>
             </div>
           </div>

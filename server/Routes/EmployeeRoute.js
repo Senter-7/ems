@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 
 const router = express.Router()
 
+// Employee Login
 router.post("/employee_login", (req, res) => {
     const sql = "SELECT * FROM employee WHERE email = ?";
     con.query(sql, [req.body.email], (err, result) => {
@@ -29,6 +30,8 @@ router.post("/employee_login", (req, res) => {
                         id: result[0].id,
                         name: result[0].name
                     });
+                } else {
+                    return res.json({ loginStatus: false, Error: "Wrong Password" });
                 }
             });
         } else {
@@ -37,7 +40,8 @@ router.post("/employee_login", (req, res) => {
     });
 });
 
-router.get('/:id', (req, res) => {  // Changed endpoint to match frontend
+// Get Employee by ID
+router.get('/:id', (req, res) => {
     const id = req.params.id;
     const sql = `
         SELECT e.*, d.name AS dept_name 
@@ -52,7 +56,7 @@ router.get('/:id', (req, res) => {  // Changed endpoint to match frontend
                 Status: true, 
                 Result: {
                     ...result[0],
-                    dept_id: result[0].dept_id.toString()  // Ensure string type for consistency
+                    dept_id: result[0].dept_id?.toString()  // Ensure string type for consistency
                 }
             });
         } else {
@@ -61,6 +65,54 @@ router.get('/:id', (req, res) => {  // Changed endpoint to match frontend
     });
 });
 
+// Add Employee
+router.post("/add_employee", (req, res) => {
+    // Hash the password before storing (if not already hashed)
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
+        if (err) return res.json({ Status: false, Error: "Password hashing error" });
+
+        const sql = `
+            INSERT INTO employee (
+                name, email, password, salary, address, dept_id, image, age, 
+                gender, account_no, bank_name, branch, university, degree, 
+                edu_branch, gradepoint, yop, father_name, mother_name, 
+                emergency_contact,alternate_contact,aadhar_number, pan_number
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)
+        `;
+        const values = [
+            req.body.name,
+            req.body.email,
+            hash,
+            req.body.salary,
+            req.body.address,
+            req.body.dept_id,
+            req.body.image || "",
+            req.body.age,
+            req.body.gender,
+            req.body.account_no,
+            req.body.bank_name,
+            req.body.branch,
+            req.body.university,
+            req.body.degree,
+            req.body.edu_branch,
+            req.body.gradepoint,
+            req.body.yop,
+            req.body.father_name,
+            req.body.mother_name,
+            req.body.emergency_contact,
+            req.body.alternate_contact,
+            req.body.aadhar_number,  // Ensure this is included
+            req.body.pan_number
+        ];
+
+        con.query(sql, values, (err, result) => {
+            if (err) return res.json({ Status: false, Error: err.message });
+            return res.json({ Status: true, Result: result });
+        });
+    });
+});
+
+// Logout
 router.get('/logout', (req, res) => {
     res.clearCookie('token');
     return res.json({ Status: true });

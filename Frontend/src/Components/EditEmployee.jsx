@@ -3,76 +3,83 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 const EditEmployee = () => {
-    const {id} = useParams()
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: currentYear - 1970 + 1 }, (_, index) => 1970 + index);
-    
-    const [employee, setEmployee] = useState({
-        name: "",
-        email: "",
-        salary: "",
-        address: "",
-        dept_id: "",
-        age: "",
-        gender: "",
-        account_no: "",
-        bank_name: "",
-        branch: "",
-        university: "",
-        degree: "",        // Added
-        edu_branch: "",    // Added
-        grade: "",         // Added
-        yop: "",
-        father_name: "",
-        mother_name: "",
-        emergency_contact: ""
-    });
+  const { id } = useParams()
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1970 + 1 }, (_, index) => 1970 + index);
 
-    const [dept, setDept] = useState([])
-    const navigate = useNavigate()
+  // Get user role from localStorage (set this at login in your app)
+  const userRole = localStorage.getItem("userRole");
+  const isEmployee = userRole === "employee";
 
-    useEffect(() => {
-        axios.get('http://localhost:3000/auth/dept')
-        .then(result => {
-            if(result.data.Status) {
-                setDept(result.data.Result);
-            } else {
-                alert(result.data.Error)
-            }
-        }).catch(err => console.log(err))
+  const [employee, setEmployee] = useState({
+    name: "",
+    email: "",
+    salary: "",
+    address: "",
+    dept_id: "",
+    age: "",
+    gender: "",
+    account_no: "",
+    bank_name: "",
+    branch: "",
+    university: "",
+    degree: "",
+    edu_branch: "",
+    gradepoint: "",
+    yop: "",
+    father_name: "",
+    mother_name: "",
+    emergency_contact: "",
+    alternate_contact: "",
+    aadhar_number: "",
+    pan_number: ""
+  });
 
-        axios.get('http://localhost:3000/auth/employee/'+id)
-        .then(result => {
-            const empData = result.data.Result[0]
-            setEmployee({
-                ...empData,
-                dept_id: empData.dept_id?.toString() || "",
-                yop: empData.yop?.toString() || "",
-                degree: empData.degree || "",         // Added
-                edu_branch: empData.edu_branch || "", // Added
-                grade: empData.grade || ""            // Added
-            })
-        }).catch(err => console.log(err))
-    }, [id])
+  const [dept, setDept] = useState([])
+  const navigate = useNavigate()
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        axios.put('http://localhost:3000/auth/edit_employee/'+id, employee)
-        .then(result => {
-            if(result.data.Status) {
-                navigate('/employee_dashboard/employee')
-            } else {
-                alert(result.data.Error)
-            }
-        }).catch(err => console.log(err))
-    }
-    
+  useEffect(() => {
+    axios.get('http://localhost:3000/auth/dept')
+      .then(result => {
+        if (result.data.Status) {
+          setDept(result.data.Result);
+        } else {
+          alert(result.data.Error)
+        }
+      }).catch(err => console.log(err))
+
+    axios.get('http://localhost:3000/auth/employee/' + id)
+      .then(result => {
+        const empData = result.data.Result[0]
+        setEmployee({
+          ...empData,
+          dept_id: empData.dept_id?.toString() || "",
+          yop: empData.yop?.toString() || "",
+          degree: empData.degree || "",
+          edu_branch: empData.edu_branch || "",
+          gradepoint: empData.gradepoint || ""
+        })
+      }).catch(err => console.log(err))
+  }, [id])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    axios.put('http://localhost:3000/auth/edit_employee/' + id, employee)
+      .then(result => {
+        if (result.data.Status) {
+          navigate('/employee_dashboard/employee')
+        } else {
+          alert(result.data.Error)
+        }
+      }).catch(err => console.log(err))
+  }
+
   return (
     <div className="d-flex justify-content-center align-items-center mt-3">
       <div className="p-3 rounded w-75 border">
         <h3 className="text-center">Edit Employee</h3>
         <form className="row g-3" onSubmit={handleSubmit}>
-          
+
           {/* Personal Details */}
           <div className="col-md-6">
             <h5>Personal Details</h5>
@@ -83,9 +90,50 @@ const EditEmployee = () => {
                 className="form-control"
                 value={employee.name}
                 onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
+                readOnly={isEmployee}
               />
             </div>
-
+            <div className="mb-3">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                className="form-control"
+                value={employee.email}
+                onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
+                readOnly={isEmployee}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Salary</label>
+              <input
+                type="number"
+                className="form-control"
+                value={employee.salary}
+                onChange={(e) => setEmployee({ ...employee, salary: e.target.value })}
+                readOnly={isEmployee}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Address</label>
+              <input
+                type="text"
+                className="form-control"
+                value={employee.address}
+                onChange={(e) => setEmployee({ ...employee, address: e.target.value })}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Department</label>
+              <select
+                className="form-select"
+                value={employee.dept_id}
+                onChange={(e) => setEmployee({ ...employee, dept_id: e.target.value })}
+              >
+                {dept.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
             <div className="row mb-3">
               <div className="col-md-6">
                 <label className="form-label">Age</label>
@@ -178,12 +226,13 @@ const EditEmployee = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Grade</label>
+              <label className="form-label">gradepoint</label>
               <input
                 type="text"
                 className="form-control"
-                value={employee.grade}
-                onChange={(e) => setEmployee({ ...employee, grade: e.target.value })}
+                value={employee.gradepoint}
+                onChange={(e) => setEmployee({ ...employee, gradepoint: e.target.value })}
+                readOnly={isEmployee}
               />
             </div>
             <div className="mb-3">
@@ -231,50 +280,38 @@ const EditEmployee = () => {
                 onChange={(e) => setEmployee({ ...employee, emergency_contact: e.target.value })}
               />
             </div>
+             <div className="mb-3">
+              <label className="form-label">Alternate Contact</label>
+              <input
+                type="tel"
+                className="form-control"
+                value={employee.alternate_contact}
+                onChange={(e) => setEmployee({ ...employee, alternate_contact: e.target.value })}
+              />
+            </div>
           </div>
 
-          {/* Original Fields */}
-          <div className="col-12">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              value={employee.email}
-              onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-            />
-          </div>
-          
-          <div className="col-12">
-            <label className="form-label">Salary</label>
-            <input
-              type="text"
-              className="form-control"
-              value={employee.salary}
-              onChange={(e) => setEmployee({ ...employee, salary: e.target.value })}
-            />
-          </div>
-
-          <div className="col-12">
-            <label className="form-label">Address</label>
-            <input
-              type="text"
-              className="form-control"
-              value={employee.address}
-              onChange={(e) => setEmployee({ ...employee, address: e.target.value })}
-            />
-          </div>
-
-          <div className="col-12">
-            <label className="form-label">Department</label>
-            <select
-              className="form-select"
-              value={employee.dept_id}
-              onChange={(e) => setEmployee({...employee, dept_id: e.target.value})}
-            >
-              {dept.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
-              ))}
-            </select>
+          {/* Government IDs */}
+          <div className="col-md-6">
+            <h5>Government IDs</h5>
+            <div className="mb-3">
+              <label className="form-label">Aadhar Number</label>
+              <input
+                type="text"
+                className="form-control"
+                value={employee.aadhar_number}
+                onChange={(e) => setEmployee({ ...employee, aadhar_number: e.target.value })}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">PAN Number</label>
+              <input
+                type="text"
+                className="form-control"
+                value={employee.pan_number}
+                onChange={(e) => setEmployee({ ...employee, pan_number: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="col-12">
