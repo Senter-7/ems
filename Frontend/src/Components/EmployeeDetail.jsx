@@ -14,15 +14,6 @@ const EmployeeDetail = () => {
         if (result.data.Status && result.data.Result) {
           setEmployee(result.data.Result);
           // Fetch department name
-          axios.get('http://localhost:3000/auth/dept')
-            .then(deptResult => {
-              if (deptResult.data.Status) {
-                const department = deptResult.data.Result.find(
-                  d => d.id === result.data.Result.dept_id
-                );
-                setDept(department?.name || '');
-              }
-            });
         }
       })
       .catch(err => console.log(err));
@@ -90,12 +81,12 @@ const EmployeeDetail = () => {
             </div>
             <div className='card-body row'>
               <div className='col-md-6'>
-                <p><strong>Department:</strong> {dept}</p>
-                <p><strong>Designation:</strong> {dept}</p>
+                <p><strong>Department:</strong> {employee.dept_name}</p>
+                <p><strong>Designation:</strong> {employee.designation}</p>
                 
               </div>
               <div className='col-md-6'>
-                <p><strong>Experience:</strong> {dept}</p>
+                <p><strong>Experience:</strong> {employee.experience}</p>
                 <p><strong>Salary:</strong> ₹{employee.salary}</p>
               </div>
             </div>
@@ -138,17 +129,7 @@ const EmployeeDetail = () => {
           </div>
         </div>
 
-        <div className='mb-4'>
-          <button
-            className='btn btn-primary me-2'
-            onClick={() => navigate(`/employee_dashboard/edit_employee/${id}`)}
-          >
-            Edit Profile
-          </button>
-          <button className='btn btn-danger' onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
+        
       </div>
     </div>
   );

@@ -1,38 +1,49 @@
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-useEffect
 
 const Start = () => {
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [showLogin, setShowLogin] = useState(false);
+
   axios.defaults.withCredentials = true;
+
   useEffect(() => {
     axios.get('http://localhost:3000/verify')
-    .then(result => {
-      if(result.data.Status) {
-        // if(result.data.role === "admin") {
-        //   navigate('/')
-        // } else {
-        //   navigate('/employee_detail/'+result.data.id)
-        // }
-        navigate('/')
-      }
-    }).catch(err =>console.log(err))
-  }, [])
+      .then(result => {
+        if (result.data.Status) {
+          navigate('/');
+        }
+      }).catch(err => console.log(err));
+  }, [navigate]);
+
+  // When user scrolls or clicks down arrow, reveal login panel
+  const handleScroll = () => setShowLogin(true);
+  const handleClick = () => setShowLogin(true);
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
-      <div className="p-3 rounded w-25 border loginForm">
-        <h2 className="text-center">Login As</h2>
-        <div className="d-flex justify-content-between mt-5 mb-2">
-          <button type="button" className="btn btn-primary" onClick={() => {navigate('/employee_login')}}>
-            Employee
-          </button>
-          <button type="button" className="btn btn-success" onClick={() => {navigate('/adminlogin')}}>
-            Admin
-          </button>
+    <div 
+      className={`start-container ${showLogin ? "show-login" : ""}`} 
+      onWheel={handleScroll} // triggers on mouse scroll
+    >
+      <section className="welcome-section">
+        <h1>Welcome to Employee Management System</h1>
+        <button className="scroll-down-btn" onClick={handleClick} aria-label="Show Login">▼</button>
+      </section>
+
+      <section className="login-section">
+        <div className="login-box">
+          <h2 className="text-center mb-4">Login As</h2>
+          <div className="d-flex justify-content-between">
+            <button type="button" className="btn btn-primary" onClick={() => navigate('/employee_login')}>
+              Employee
+            </button>
+            <button type="button" className="btn btn-success" onClick={() => navigate('/adminlogin')}>
+              Admin
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
