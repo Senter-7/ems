@@ -14,8 +14,6 @@ import Start from './Components/Start'
 import EmployeeLogin from './Components/EmployeeLogin'
 import EmployeeDetail from './Components/EmployeeDetail'
 import PrivateRoute from './Components/PrivateRoute'
-import AttendanceTab from './Components/AttendanceTab'
-import EmployeeAttendance from './Components/EmployeeAttendance'
 
 function App() {
   return (
