@@ -197,6 +197,31 @@ router.get('/employee/:id', (req, res) => {
   });
 });
 
+router.get('/employee/dept/:dept_id', (req, res) => {
+  const dept_id = req.params.dept_id;
+  const sql = `
+    SELECT e.*, d.name AS dept_name 
+    FROM employee e 
+    LEFT JOIN dept d ON e.dept_id = d.id 
+    WHERE e.dept_id = ?
+  `;
+  
+  con.query(sql, [dept_id], (err, result) => {
+    if(err) return res.json({ 
+      Status: false, 
+      Error: "Database query error",
+      Details: err.message
+    });
+    
+    return res.json({ 
+      Status: true, 
+      Result: result.map(emp => ({
+        ...emp,
+        dept_id: emp.dept_id?.toString()  // Convert to string for consistency
+      }))
+    });
+  });
+});
 // Dashboard Statistics
 router.get('/admin_count', (req, res) => {
   const sql = "SELECT COUNT(id) AS admin FROM admin";
