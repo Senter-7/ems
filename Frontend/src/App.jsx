@@ -7,7 +7,6 @@ import EmployeeDashboard from './Components/EmployeeDashboard'
 import Home from './Components/Home'
 import Employee from './Components/Employee'
 import Dept from './Components/Dept'
-import Profile from './Components/Profile'
 import AddDept from './Components/AddDept'
 import AddEmployee from './Components/AddEmployee'
 import EditEmployee from './Components/EditEmployee'
@@ -15,6 +14,8 @@ import Start from './Components/Start'
 import EmployeeLogin from './Components/EmployeeLogin'
 import EmployeeDetail from './Components/EmployeeDetail'
 import PrivateRoute from './Components/PrivateRoute'
+import AttendanceTab from './Components/AttendanceTab'
+import EmployeeAttendance from './Components/EmployeeAttendance'
 
 function App() {
   return (
@@ -33,7 +34,7 @@ function App() {
           <Route path='' element={<Home />} />
           <Route path='employee' element={<Employee />} />
           <Route path='dept' element={<Dept />} />
-          <Route path='profile' element={<Profile />} />
+          <Route path='attendance' element={<AttendanceTab />} />
           <Route path='add_dept' element={<AddDept />} />
           <Route path='add_employee' element={<AddEmployee />} />
           {/* <Route path='edit_employee/:id' element={<EditEmployee />} />
@@ -48,6 +49,8 @@ function App() {
         }>
           <Route path='employee_detail/:id' element={<EmployeeDetail />} />
           <Route path='edit_employee/:id' element={<EditEmployee />} />
+          <Route path='attendance' element={<EmployeeAttendance />} />
+          
         </Route>
       </Routes>
     </BrowserRouter>

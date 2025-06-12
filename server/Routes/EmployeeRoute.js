@@ -67,7 +67,6 @@ router.get('/:id', (req, res) => {
 
 // Add Employee
 router.post("/add_employee", (req, res) => {
-    // Hash the password before storing (if not already hashed)
     bcrypt.hash(req.body.password, 10, (err, hash) => {
         if (err) return res.json({ Status: false, Error: "Password hashing error" });
 
@@ -101,13 +100,93 @@ router.post("/add_employee", (req, res) => {
             req.body.mother_name,
             req.body.emergency_contact,
             req.body.alternate_contact,
-            req.body.aadhar_number,  // Ensure this is included
+            req.body.aadhar_number,
             req.body.pan_number
         ];
 
         con.query(sql, values, (err, result) => {
             if (err) return res.json({ Status: false, Error: err.message });
             return res.json({ Status: true, Result: result });
+        });
+    });
+});
+
+// --------------------------
+// Attendance Routes
+// --------------------------
+
+// Mark Attendance (Present/Absent)
+router.post('/attendance', (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+    jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+        if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+
+        const status = req.body.status?.toLowerCase();
+        if (!['present', 'absent'].includes(status)) {
+            return res.status(400).json({ 
+                Status: false, 
+                Error: "Invalid status. Use 'present' or 'absent'" 
+            });
+        }
+
+       const sql = `
+        INSERT INTO attendance 
+            (employee_id, attendance_date, attendance_time, status)
+        VALUES 
+            (?, CURDATE(), CURTIME(), ?)
+        ON DUPLICATE KEY UPDATE 
+            status = ?,
+            attendance_time = CURTIME()`;
+        con.query(sql, [decoded.id, status, status], (err, result) => {
+            if (err) return res.status(500).json({ 
+                Status: false, 
+                Error: "Database operation failed",
+                Details: err.message
+            });
+            
+            return res.json({ 
+                Status: true, 
+                Message: "Attendance recorded",
+                Record: {
+                    employee_id: decoded.id,
+                    date: new Date().toISOString().split('T')[0],
+                    status: status
+                }
+            });
+        });
+    });
+});
+
+// Get Attendance History (last 30 days)
+router.get('/attendance/history', (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+    jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+        if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+
+        const sql = `
+        SELECT attendance_date, attendance_time, status 
+        FROM attendance 
+        WHERE employee_id = ?
+        ORDER BY attendance_date DESC
+        LIMIT 30`;
+        con.query(sql, [decoded.id], (err, result) => {
+            if (err) return res.status(500).json({ 
+                Status: false, 
+                Error: "Failed to fetch records",
+                Details: err.message
+            });
+            
+            return res.json({ 
+                Status: true, 
+                Result: result.map(record => ({
+                    date: new Date(record.date).toLocaleDateString('en-IN'),
+                    status: record.status.charAt(0).toUpperCase() + record.status.slice(1)
+                }))
+            });
         });
     });
 });

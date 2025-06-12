@@ -74,7 +74,7 @@ router.post('/add_dept', (req, res) => {
 router.post('/add_employee', upload.single('image'), (req, res) => {
   const sql = `INSERT INTO employee 
     (name, email, password, address, salary, image, dept_id, age, gender,
-     account_no, bank_name, branch, university, yop, father_name, mother_name,
+     account_no, bank_name, branch, university, yop, father_name, mother_name,designation,experience
      emergency_contact,alternate_contact,aadhar_number, pan_number, degree, edu_branch, gradepoint) 
     VALUES (?)`;
 
@@ -102,7 +102,8 @@ router.post('/add_employee', upload.single('image'), (req, res) => {
       req.body.mother_name,
       req.body.emergency_contact,
       req.body.alternate_contact,
-      
+      req.body.experience,
+      req.body.designation,      
       req.body.aadhar_number,  // Added
       req.body.pan_number,     // Added
       req.body.degree,         // Added
