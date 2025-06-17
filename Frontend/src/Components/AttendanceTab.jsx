@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function AttendanceTab() {
   const [departments, setDepartments] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [selectedDept, setSelectedDept] = useState('');
-  const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [records, setRecords] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,60 +29,78 @@ function AttendanceTab() {
     fetchDepartments();
   }, []);
 
-  // Fetch employees when department changes
+  // Fetch employees and attendance when department changes
   useEffect(() => {
-  const fetchEmployees = async () => {
-    if (selectedDept) {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `http://localhost:3000/auth/employee/dept/${selectedDept}`, 
-          { withCredentials: true }
-        );
-
-        if (response.data.Status) {
-          setEmployees(response.data.Result);
-          setError('');
-        } else {
-          setError(response.data.Error || 'Failed to load employees');
-          setEmployees([]);
-        }
-      } catch (err) {
-        setError(err.response?.data?.Error || 'Failed to load employees');
-        setEmployees([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-  fetchEmployees();
-}, [selectedDept]);
-  // Fetch attendance history when employee changes
-  useEffect(() => {
-    const fetchAttendance = async () => {
-      if (selectedEmployee) {
+    const fetchData = async () => {
+      if (selectedDept) {
         try {
           setLoading(true);
-          const response = await axios.get(`http://localhost:3000/auth/attendance/employee/${selectedEmployee}`, {
-            withCredentials: true
-          });
-          if (response.data.Status) {
-            setRecords(response.data.Result);
+          setError('');
+          setEmployees([]);
+          setAttendance([]);
+
+          const [employeesRes, attendanceRes] = await Promise.all([
+            axios.get(`http://localhost:3000/auth/employee/dept/${selectedDept}`, {
+              withCredentials: true
+            }),
+            axios.get(`http://localhost:3000/auth/attendance/dept/${selectedDept}`, {
+              withCredentials: true
+            })
+          ]);
+
+          if (employeesRes.data.Status) {
+            setEmployees(employeesRes.data.Result);
+          } else {
+            setError('Failed to load employees');
           }
+
+          if (attendanceRes.data.Status) {
+            setAttendance(attendanceRes.data.Result);
+          } else {
+            setError('Failed to load attendance records');
+          }
+
         } catch (err) {
-          setError('Failed to load attendance records');
+          setError(err.response?.data?.Error || 'Failed to load data');
         } finally {
           setLoading(false);
         }
       }
     };
-    fetchAttendance();
-  }, [selectedEmployee]);
+    fetchData();
+  }, [selectedDept]);
+
+  // Convert date to local YYYY-MM-DD format
+  const getLocalDateString = (date) => {
+    return `${date.getFullYear()}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  };
+
+  // Combine employee data with attendance for selected date
+  const getAttendanceForDate = () => {
+    if (!selectedDate) return [];
+    
+    const targetDate = getLocalDateString(selectedDate);
+    
+    return employees.map(employee => {
+      const record = attendance.find(a => 
+  a.employee_id === employee.id && 
+  new Date(a.attendance_date).toISOString().slice(0,10) === targetDate
+);
+
+      
+      return {
+        ...employee,
+        status: record ? record.status : 'Not Marked'
+      };
+    });
+  };
 
   return (
-    <div style={{ maxWidth: 800, margin: '2rem auto', padding: 20 }}>
-      <h2>Employee Attendance History</h2>
-      
+    <div style={{ maxWidth: 1000, margin: '2rem auto', padding: 20 }}>
+      <h2>Department Attendance</h2>
+
       {/* Department Selection */}
       <div style={{ marginBottom: 20 }}>
         <label>Select Department: </label>
@@ -88,8 +108,7 @@ function AttendanceTab() {
           value={selectedDept} 
           onChange={(e) => {
             setSelectedDept(e.target.value);
-            setSelectedEmployee('');
-            setRecords([]);
+            setSelectedDate(null);
           }}
           disabled={loading}
         >
@@ -100,19 +119,18 @@ function AttendanceTab() {
         </select>
       </div>
 
-      {/* Employee Selection */}
+      {/* Date Picker */}
       <div style={{ marginBottom: 20 }}>
-        <label>Select Employee: </label>
-        <select
-          value={selectedEmployee}
-          onChange={(e) => setSelectedEmployee(e.target.value)}
+        <label>Select Date: </label>
+        <DatePicker
+          selected={selectedDate}
+          onChange={date => setSelectedDate(date)}
+          dateFormat="dd-MMM-yyyy"
+          isClearable
+          placeholderText="Choose date"
           disabled={!selectedDept || loading}
-        >
-          <option value="">Select Employee</option>
-          {employees.map(emp => (
-            <option key={emp.id} value={emp.id}>{emp.name}</option>
-          ))}
-        </select>
+          maxDate={new Date()}
+        />
       </div>
 
       {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
@@ -129,32 +147,33 @@ function AttendanceTab() {
         }}>
           <thead>
             <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ padding: '12px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Date</th>
-              <th style={{ padding: '12px', borderBottom: '2px solid #ddd', textAlign: 'left' }}>Status</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Employee</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
             </tr>
           </thead>
           <tbody>
-            {records.length === 0 ? (
+            {!selectedDate ? (
               <tr>
                 <td colSpan={2} style={{ padding: '16px', textAlign: 'center' }}>
-                  {selectedEmployee ? 'No attendance records found' : 'Select an employee to view attendance'}
+                  Select a date to view attendance
+                </td>
+              </tr>
+            ) : getAttendanceForDate().length === 0 ? (
+              <tr>
+                <td colSpan={2} style={{ padding: '16px', textAlign: 'center' }}>
+                  No attendance records for this date
                 </td>
               </tr>
             ) : (
-              records.map((record, index) => (
+              getAttendanceForDate().map((employee, index) => (
                 <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '12px' }}>
-                    {new Date(record.date).toLocaleDateString('en-IN', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </td>
+                  <td style={{ padding: '12px' }}>{employee.name}</td>
                   <td style={{ 
                     padding: '12px',
-                    color: record.status === 'Present' ? '#28a745' : '#dc3545'
+                    color: employee.status === 'Present' ? '#28a745' : 
+                          employee.status === 'Absent' ? '#dc3545' : '#6c757d'
                   }}>
-                    {record.status}
+                    {employee.status}
                   </td>
                 </tr>
               ))
