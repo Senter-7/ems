@@ -3,6 +3,13 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+// Helper: Get YYYY-MM-DD string in IST
+function getISTDateString(date) {
+  return date
+    ? date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+    : '';
+}
+
 function AttendanceTab() {
   const [departments, setDepartments] = useState([]);
   const [selectedDept, setSelectedDept] = useState('');
@@ -70,26 +77,16 @@ function AttendanceTab() {
     fetchData();
   }, [selectedDept]);
 
-  // Convert date to local YYYY-MM-DD format
-  const getLocalDateString = (date) => {
-    return `${date.getFullYear()}-${(date.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-  };
-
-  // Combine employee data with attendance for selected date
+  // Combine employee data with attendance for selected date (in IST)
   const getAttendanceForDate = () => {
     if (!selectedDate) return [];
-    
-    const targetDate = getLocalDateString(selectedDate);
-    
-    return employees.map(employee => {
-      const record = attendance.find(a => 
-  a.employee_id === employee.id && 
-  new Date(a.attendance_date).toISOString().slice(0,10) === targetDate
-);
+    const targetDateIST = getISTDateString(selectedDate);
 
-      
+    return employees.map(employee => {
+      const record = attendance.find(a =>
+        a.employee_id === employee.id &&
+        getISTDateString(new Date(a.attendance_date)) === targetDateIST
+      );
       return {
         ...employee,
         status: record ? record.status : 'Not Marked'
