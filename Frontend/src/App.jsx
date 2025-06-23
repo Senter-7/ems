@@ -13,11 +13,15 @@ import EditEmployee from './Components/EditEmployee'
 import Start from './Components/Start'
 import AttendanceTab from './Components/AttendanceTab'
 import EmployeeAttendance from './Components/EmployeeAttendance'
+import AttendanceTab from './Components/AttendanceTab'
+import EmployeeAttendance from './Components/EmployeeAttendance'
 import EmployeeLogin from './Components/EmployeeLogin'
 import EmployeeDetail from './Components/EmployeeDetail'
 import PrivateRoute from './Components/PrivateRoute'
 import Leave from './Components/Leave'
 import ApproveLeave from './Components/ApproveLeave'
+import Projects from './Components/Projects'
+import AddProject from './Components/AddProjects';
 
 function App() {
   return (
@@ -43,6 +47,10 @@ function App() {
           
           {/* <Route path='edit_employee/:id' element={<EditEmployee />} />
           <Route path='employee_detail/:id' element={<EmployeeDetail />} /> */}
+          <Route path='projects' element={<Projects />} />
+          <Route path='add_projects' element={<AddProject />} />
+
+
         </Route>
 
         {/* Employee Dashboard Routes */}
