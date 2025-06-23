@@ -10,7 +10,7 @@ const AdminDashboard = () => {
       <div className="row flex-nowrap">
         <Sidebar role="admin" />
         <div className="col p-0 m-0">
-          <div className="p-2 d-flex justify-content-center shadow">
+          <div className="p-2 d-flex justify-content-center">
             <h4>Employee Management System</h4>
           </div>
           <Outlet />
