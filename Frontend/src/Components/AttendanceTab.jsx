@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
+// Helper: Get YYYY-MM-DD string in IST
+function getISTDateString(date) {
+  return date
+    ? date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+    : '';
+}
 
 function AttendanceTab() {
   const [departments, setDepartments] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [selectedDept, setSelectedDept] = useState('');
-  const [selectedEmp, setSelectedEmp] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [attendanceMarked, setAttendanceMarked] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -15,129 +23,161 @@ function AttendanceTab() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:3000/auth/dept');
-        if (response.data.Status && Array.isArray(response.data.Result)) {
+        const response = await axios.get('http://localhost:3000/auth/dept', {
+          withCredentials: true
+        });
+        if (response.data.Status) {
           setDepartments(response.data.Result);
-        } else {
-          setDepartments([]);
-          setError('Invalid department data format');
         }
       } catch (err) {
         setError('Failed to load departments');
-        setDepartments([]);
-      } finally {
-        setLoading(false);
       }
     };
     fetchDepartments();
   }, []);
 
-  // Fetch employees when department changes
+  // Fetch employees and attendance when department changes
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchData = async () => {
       if (selectedDept) {
         try {
           setLoading(true);
-          const response = await axios.get(`/auth/employee/dept/${selectedDept}`);
-          if (response.data.Status && Array.isArray(response.data.Result)) {
-            setEmployees(response.data.Result);
-          } else {
-            setEmployees([]);
-          }
-        } catch (err) {
-          setError('Failed to load employees');
+          setError('');
           setEmployees([]);
+          setAttendance([]);
+
+          const [employeesRes, attendanceRes] = await Promise.all([
+            axios.get(`http://localhost:3000/auth/employee/dept/${selectedDept}`, {
+              withCredentials: true
+            }),
+            axios.get(`http://localhost:3000/auth/attendance/dept/${selectedDept}`, {
+              withCredentials: true
+            })
+          ]);
+
+          if (employeesRes.data.Status) {
+            setEmployees(employeesRes.data.Result);
+          } else {
+            setError('Failed to load employees');
+          }
+
+          if (attendanceRes.data.Status) {
+            setAttendance(attendanceRes.data.Result);
+          } else {
+            setError('Failed to load attendance records');
+          }
+
+        } catch (err) {
+          setError(err.response?.data?.Error || 'Failed to load data');
         } finally {
           setLoading(false);
         }
-      } else {
-        setEmployees([]);
-        setSelectedEmp('');
       }
     };
-    fetchEmployees();
+    fetchData();
   }, [selectedDept]);
 
-  // Reset attendanceMarked when employee or date or department changes
-  useEffect(() => {
-    setAttendanceMarked(false);
-  }, [selectedEmp, selectedDate, selectedDept]);
+  // Combine employee data with attendance for selected date (in IST)
+  const getAttendanceForDate = () => {
+    if (!selectedDate) return [];
+    const targetDateIST = getISTDateString(selectedDate);
 
-  const handleAttendance = async (status) => {
-    try {
-      setLoading(true);
-      await axios.post('/auth/attendance', {
-        employee_id: selectedEmp,
-        date: selectedDate,
-        status
-      });
-      setAttendanceMarked(true);
-      setError('');
-    } catch (err) {
-      setError(err.response?.data?.Error || 'Failed to mark attendance');
-    } finally {
-      setLoading(false);
-    }
+    return employees.map(employee => {
+      const record = attendance.find(a =>
+        a.employee_id === employee.id &&
+        getISTDateString(new Date(a.attendance_date)) === targetDateIST
+      );
+      return {
+        ...employee,
+        status: record ? record.status : 'Not Marked'
+      };
+    });
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
-      <h2>Mark Attendance</h2>
-      {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
+    <div style={{ maxWidth: 1000, margin: '2rem auto', padding: 20 }}>
+      <h2>Department Attendance</h2>
 
-      {/* Department Dropdown */}
-<select value={selectedDept} onChange={e => setSelectedDept(e.target.value)}>
-  <option value="">Select Department</option>
-  {departments.map(dept => (
-    <option key={dept.id} value={dept.id}>{dept.name}</option>
-  ))}
-</select>
-
-      {/* Employee Dropdown */}
-      <div>
-        <label>Employee:</label>
+      {/* Department Selection */}
+      <div style={{ marginBottom: 20 }}>
+        <label>Select Department: </label>
         <select 
-          value={selectedEmp} 
-          onChange={e => setSelectedEmp(e.target.value)} 
-          disabled={!selectedDept || loading}
+          value={selectedDept} 
+          onChange={(e) => {
+            setSelectedDept(e.target.value);
+            setSelectedDate(null);
+          }}
+          disabled={loading}
         >
-          <option value="">Select Employee</option>
-          {employees.map(emp => (
-            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          <option value="">Select Department</option>
+          {departments.map(dept => (
+            <option key={dept.id} value={dept.id}>{dept.name}</option>
           ))}
         </select>
       </div>
 
       {/* Date Picker */}
-      <div>
-        <label>Date:</label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={e => setSelectedDate(e.target.value)}
-          disabled={!selectedEmp || loading}
+      <div style={{ marginBottom: 20 }}>
+        <label>Select Date: </label>
+        <DatePicker
+          selected={selectedDate}
+          onChange={date => setSelectedDate(date)}
+          dateFormat="dd-MMM-yyyy"
+          isClearable
+          placeholderText="Choose date"
+          disabled={!selectedDept || loading}
+          maxDate={new Date()}
         />
       </div>
 
-      {/* Attendance Buttons */}
-      <div style={{ marginTop: 20 }}>
-        <button
-          onClick={() => handleAttendance('Present')}
-          disabled={!selectedEmp || !selectedDate || attendanceMarked || loading}
-          style={{ marginRight: 10 }}
-        >
-          {loading ? 'Processing...' : 'Present'}
-        </button>
-        <button
-          onClick={() => handleAttendance('Absent')}
-          disabled={!selectedEmp || !selectedDate || attendanceMarked || loading}
-        >
-          {loading ? 'Processing...' : 'Absent'}
-        </button>
-      </div>
-      
-      {attendanceMarked && <div style={{ color: 'green', marginTop: 10 }}>Attendance marked!</div>}
+      {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
+
+      {/* Attendance Table */}
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <table style={{ 
+          width: '100%', 
+          borderCollapse: 'collapse', 
+          marginTop: 20,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <thead>
+            <tr style={{ backgroundColor: '#f5f5f5' }}>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Employee</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!selectedDate ? (
+              <tr>
+                <td colSpan={2} style={{ padding: '16px', textAlign: 'center' }}>
+                  Select a date to view attendance
+                </td>
+              </tr>
+            ) : getAttendanceForDate().length === 0 ? (
+              <tr>
+                <td colSpan={2} style={{ padding: '16px', textAlign: 'center' }}>
+                  No attendance records for this date
+                </td>
+              </tr>
+            ) : (
+              getAttendanceForDate().map((employee, index) => (
+                <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
+                  <td style={{ padding: '12px' }}>{employee.name}</td>
+                  <td style={{ 
+                    padding: '12px',
+                    color: employee.status === 'Present' ? '#28a745' : 
+                          employee.status === 'Absent' ? '#dc3545' : '#6c757d'
+                  }}>
+                    {employee.status}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

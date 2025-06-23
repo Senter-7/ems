@@ -11,9 +11,13 @@ import AddDept from './Components/AddDept'
 import AddEmployee from './Components/AddEmployee'
 import EditEmployee from './Components/EditEmployee'
 import Start from './Components/Start'
+import AttendanceTab from './Components/AttendanceTab'
+import EmployeeAttendance from './Components/EmployeeAttendance'
 import EmployeeLogin from './Components/EmployeeLogin'
 import EmployeeDetail from './Components/EmployeeDetail'
 import PrivateRoute from './Components/PrivateRoute'
+import Leave from './Components/Leave'
+import ApproveLeave from './Components/ApproveLeave'
 
 function App() {
   return (
@@ -35,6 +39,8 @@ function App() {
           <Route path='attendance' element={<AttendanceTab />} />
           <Route path='add_dept' element={<AddDept />} />
           <Route path='add_employee' element={<AddEmployee />} />
+          <Route path='leave' element={<ApproveLeave />} />
+          
           {/* <Route path='edit_employee/:id' element={<EditEmployee />} />
           <Route path='employee_detail/:id' element={<EmployeeDetail />} /> */}
         </Route>
@@ -48,6 +54,8 @@ function App() {
           <Route path='employee_detail/:id' element={<EmployeeDetail />} />
           <Route path='edit_employee/:id' element={<EditEmployee />} />
           <Route path='attendance' element={<EmployeeAttendance />} />
+          <Route path='apply_leave' element={<Leave />} />
+          
           
         </Route>
       </Routes>

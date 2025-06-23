@@ -111,6 +111,8 @@ router.post("/add_employee", (req, res) => {
     });
 });
 
+
+
 // --------------------------
 // Attendance Routes
 // --------------------------
@@ -131,65 +133,185 @@ router.post('/attendance', (req, res) => {
             });
         }
 
-       const sql = `
-        INSERT INTO attendance 
-            (employee_id, attendance_date, attendance_time, status)
-        VALUES 
-            (?, CURDATE(), CURTIME(), ?)
-        ON DUPLICATE KEY UPDATE 
-            status = ?,
-            attendance_time = CURTIME()`;
-        con.query(sql, [decoded.id, status, status], (err, result) => {
-            if (err) return res.status(500).json({ 
-                Status: false, 
-                Error: "Database operation failed",
-                Details: err.message
-            });
-            
-            return res.json({ 
-                Status: true, 
-                Message: "Attendance recorded",
-                Record: {
-                    employee_id: decoded.id,
-                    date: new Date().toISOString().split('T')[0],
-                    status: status
-                }
+        // Set MySQL session timezone to IST (+05:30)
+        con.query("SET time_zone = '+05:30';", (timezoneErr) => {
+            if (timezoneErr) {
+                return res.status(500).json({ 
+                    Status: false, 
+                    Error: "Failed to set timezone",
+                    Details: timezoneErr.message 
+                });
+            }
+
+            // Use IST dates in the query (CURDATE() now returns IST date)
+            const sql = `
+                INSERT INTO attendance 
+                    (employee_id, attendance_date, attendance_time, status)
+                VALUES 
+                    (?, CURDATE(), CURTIME(), ?)
+                ON DUPLICATE KEY UPDATE 
+                    status = ?,
+                    attendance_time = CURTIME()`;
+
+            con.query(sql, [decoded.id, status, status], (err, result) => {
+                if (err) return res.status(500).json({ 
+                    Status: false, 
+                    Error: "Database operation failed",
+                    Details: err.message 
+                });
+
+                // Get today's date in IST for the response
+                const todayIST = new Date()
+                    .toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+
+                return res.json({ 
+                    Status: true, 
+                    Message: "Attendance recorded",
+                    Record: {
+                        employee_id: decoded.id,
+                        date: todayIST, // e.g., "2025-06-18" (IST)
+                        status: status
+                    }
+                });
             });
         });
     });
 });
+
+
 
 // Get Attendance History (last 30 days)
 router.get('/attendance/history', (req, res) => {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
-
-    jwt.verify(token, "jwt_secret_key", (err, decoded) => {
-        if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
-
-        const sql = `
-        SELECT attendance_date, attendance_time, status 
-        FROM attendance 
-        WHERE employee_id = ?
-        ORDER BY attendance_date DESC
-        LIMIT 30`;
-        con.query(sql, [decoded.id], (err, result) => {
-            if (err) return res.status(500).json({ 
+    // Set MySQL session timezone to IST
+    con.query("SET time_zone = '+05:30';", (timezoneErr) => {
+        if (timezoneErr) {
+            return res.status(500).json({ 
                 Status: false, 
-                Error: "Failed to fetch records",
-                Details: err.message
+                Error: "Failed to set timezone",
+                Details: timezoneErr.message 
             });
-            
-            return res.json({ 
-                Status: true, 
-                Result: result.map(record => ({
-                    date: new Date(record.date).toLocaleDateString('en-IN'),
-                    status: record.status.charAt(0).toUpperCase() + record.status.slice(1)
-                }))
+        }
+
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+        jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+            if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+
+            const sql = `
+                SELECT attendance_date, attendance_time, status 
+                FROM attendance 
+                WHERE employee_id = ?
+                ORDER BY attendance_date DESC
+                LIMIT 30`;
+
+            con.query(sql, [decoded.id], (err, result) => {
+                if (err) return res.status(500).json({ 
+                    Status: false, 
+                    Error: "Failed to fetch records",
+                    Details: err.message
+                });
+
+                // Convert attendance_date to IST string for each record
+                return res.json({ 
+                    Status: true, 
+                    Result: result.map(record => ({
+                        date: new Date(record.attendance_date)
+                            .toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }),
+                        status: record.status.charAt(0).toUpperCase() + record.status.slice(1)
+                    }))
+                });
             });
         });
     });
 });
+
+// Reset ONLY today's attendance
+router.delete('/attendance/reset', (req, res) => {
+    // Set MySQL session timezone to IST
+    con.query("SET time_zone = '+05:30';", (timezoneErr) => {
+        if (timezoneErr) {
+            return res.status(500).json({ 
+                Status: false, 
+                Error: "Failed to set timezone",
+                Details: timezoneErr.message 
+            });
+        }
+
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+        jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+            if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+
+            const sql = `
+                DELETE FROM attendance 
+                WHERE employee_id = ? AND attendance_date = CURDATE()`;
+
+            con.query(sql, [decoded.id], (err, result) => {
+                if (err) return res.status(500).json({ 
+                    Status: false, 
+                    Error: "Database error", 
+                    Details: err.message 
+                });
+
+                return res.json({ Status: true, Message: "Today's attendance has been reset" });
+            });
+        });
+    });
+});
+
+router.post('/apply_leave', (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+  jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+    if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+
+    const employee_id = decoded.id; // Correctly get employee id
+    const { start_date, end_date, leave_type, purpose } = req.body;
+    const sql = `
+      INSERT INTO leaves (employee_id, start_date, end_date, leave_type, purpose, status)
+      VALUES (?, ?, ?, ?, ?, 'pending')
+    `;
+    con.query(sql, [employee_id, start_date, end_date, leave_type, purpose], (err, result) => {
+      if (err) return res.json({ Status: false, Error: err.message });
+      return res.json({ Status: true, Result: result });
+    });
+  });
+});
+
+router.get('/leave/history', (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+  jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+    if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+
+    const sql = `
+      SELECT leave_id, leave_type, start_date, end_date, purpose, status
+      FROM leaves
+      WHERE employee_id = ?
+      ORDER BY start_date DESC
+    `;
+    
+    con.query(sql, [decoded.id], (err, result) => {
+      if (err) {
+        return res.status(500).json({ 
+          Status: false, 
+          Error: "Database error", 
+          Details: err.message 
+        });
+      }
+
+      return res.json({
+        Status: true,
+        Result: result
+      });
+    });
+  });
+});
+
 
 // Logout
 router.get('/logout', (req, res) => {

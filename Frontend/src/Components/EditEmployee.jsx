@@ -1,16 +1,15 @@
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const EditEmployee = () => {
-  const { id } = useParams()
+  const { id } = useParams();
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1970 + 1 }, (_, index) => 1970 + index);
-
-  // Get user role from localStorage (set this at login in your app)
   const userRole = localStorage.getItem("userRole");
   const isEmployee = userRole === "employee";
 
+  // State for form, original data, and image
   const [employee, setEmployee] = useState({
     name: "",
     email: "",
@@ -34,9 +33,12 @@ const EditEmployee = () => {
     aadhar_number: "",
     pan_number: ""
   });
-
-  const [dept, setDept] = useState([])
-  const navigate = useNavigate()
+  
+  const [originalEmployee, setOriginalEmployee] = useState({});
+  const [dept, setDept] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('http://localhost:3000/auth/dept')
@@ -44,41 +46,98 @@ const EditEmployee = () => {
         if (result.data.Status) {
           setDept(result.data.Result);
         } else {
-          alert(result.data.Error)
+          alert(result.data.Error);
         }
-      }).catch(err => console.log(err))
+      }).catch(err => console.log(err));
 
-    axios.get('http://localhost:3000/auth/employee/' + id)
+    axios.get('http://localhost:3000/employee_dashboard/employee/' + id)
       .then(result => {
-        const empData = result.data.Result[0]
-        setEmployee({
+        const empData = result.data.Result[0];
+        const transformedData = {
           ...empData,
           dept_id: empData.dept_id?.toString() || "",
           yop: empData.yop?.toString() || "",
           degree: empData.degree || "",
           edu_branch: empData.edu_branch || "",
           gradepoint: empData.gradepoint || ""
-        })
-      }).catch(err => console.log(err))
-  }, [id])
+        };
+        
+        setEmployee(transformedData);
+        setOriginalEmployee(transformedData); // Store original data
+      }).catch(err => console.log(err));
+  }, [id]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  
+
+  // Get only changed fields
+  const getChangedFields = () => {
+    const changed = {};
+    Object.keys(employee).forEach(key => {
+      if (employee[key] !== originalEmployee[key]) {
+        changed[key] = employee[key];
+      }
+    });
+    return changed;
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    axios.put('http://localhost:3000/auth/edit_employee/' + id, employee)
+    e.preventDefault();
+    const changedFields = getChangedFields();
+    
+    if (Object.keys(changedFields).length === 0) {
+      alert('No changes detected');
+      return;
+    }
+    
+    axios.put('http://localhost:3000/auth/edit_employee/' + id, changedFields)
       .then(result => {
         if (result.data.Status) {
-          navigate('/employee_dashboard/employee')
+          navigate('/employee_dashboard/employee');
         } else {
-          alert(result.data.Error)
+          alert(result.data.Error);
         }
-      }).catch(err => console.log(err))
-  }
+      }).catch(err => console.log(err));
+  };
 
   return (
     <div className="d-flex justify-content-center align-items-center mt-3">
       <div className="p-3 rounded w-75 border">
         <h3 className="text-center">Edit Employee</h3>
         <form className="row g-3" onSubmit={handleSubmit}>
+          {/* Profile Picture Section */}
+          <div className="col-12">
+            <div className="mb-3 text-center">
+              <label className="form-label d-block">Profile Picture</label>
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Profile Preview"
+                  className="mb-2"
+                  style={{ 
+                    width: "100px", 
+                    height: "100px", 
+                    objectFit: "cover", 
+                    borderRadius: "50%",
+                    border: "2px solid #ddd"
+                  }}
+                />
+              )}
+              <input
+                type="file"
+                className="form-control"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
 
           {/* Personal Details */}
           <div className="col-md-6">
@@ -280,7 +339,7 @@ const EditEmployee = () => {
                 onChange={(e) => setEmployee({ ...employee, emergency_contact: e.target.value })}
               />
             </div>
-             <div className="mb-3">
+            <div className="mb-3">
               <label className="form-label">Alternate Contact</label>
               <input
                 type="tel"
@@ -322,7 +381,7 @@ const EditEmployee = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EditEmployee
+export default EditEmployee;
