@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AdminDashboard from "./AdminDashboard";
 
 const AddEmployee = () => {
   const currentYear = new Date().getFullYear();
@@ -10,12 +11,13 @@ const AddEmployee = () => {
     name: "",
     email: "",
     password: "",
-    salary: "",
+   
     address: "",
     dept_id: "",
     designation: "",      // Added for Office Details
     experience: "",       // Added for Office Details
     image: "",
+    dob: "",
     age: "",
     gender: "",
     account_no: "",
@@ -35,6 +37,7 @@ const AddEmployee = () => {
   });
 
   const [dept, setDept] = useState([]);
+  const [isAgeValid, setIsAgeValid] = useState(true);
   const navigate = useNavigate();
 
   // Fetch department list
@@ -46,6 +49,36 @@ const AddEmployee = () => {
       .catch(err => console.log(err));
   }, []);
 
+  const calculateAge = (dob) => {
+    const dobDate = new Date(dob);
+    if (isNaN(dobDate)) {
+      // If dobDate is invalid, return null or handle the error appropriately
+      console.error('Invalid Date of Birth');
+      return '';
+    }
+    const today = new Date();
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const m = today.getMonth() - dobDate.getMonth();
+
+    if(m < 0 || (m == 0 && today.getDate() < dobDate.getDate()))
+        age--;
+    return age;
+  }
+
+  useEffect(() => {
+      if(employee.dob){
+        const theAge = calculateAge(employee.dob);
+        setEmployee((prevState) => ({
+          ...prevState,
+          age: theAge
+        }));
+        if (theAge < 18 || theAge > 60) {
+        setIsAgeValid(false);
+      } else {
+        setIsAgeValid(true);
+      }
+      }
+  },[employee.dob]);
   // Handle image upload
   const handleImage = (e) => {
     setEmployee({ ...employee, image: e.target.files[0] });
@@ -68,7 +101,6 @@ const AddEmployee = () => {
     formData.append("email", employee.email);
     formData.append("password", employee.password);
     formData.append("address", employee.address);
-    formData.append("salary", employee.salary);
     formData.append("image", employee.image);
     formData.append("dept_id", Number(employee.dept_id));
     formData.append("designation", employee.designation); // Office Details
@@ -83,6 +115,8 @@ const AddEmployee = () => {
     formData.append("edu_branch", employee.edu_branch);
     formData.append("gradepoint", employee.gradepoint);
     formData.append("yop", employee.yop);
+    formData.append("dob", employee.dob);
+
 
     // Optional fields: send as "" if blank
     formData.append("father_name", employee.father_name || "");
@@ -105,314 +139,245 @@ const AddEmployee = () => {
       .catch((err) => console.log(err));
   };
 
-  return (
-    <div className="d-flex justify-content-center align-items-center mt-3">
-      <div className="p-3 rounded w-75 border">
-        <h3 className="text-center">Add Employee</h3>
-        <form className="row g-3" onSubmit={handleSubmit} encType="multipart/form-data">
+return (
+  <div className="flex justify-center items-center mt-4" >
+    <div className="p-4 rounded w-100" style={{ maxWidth: "1200px" }}>
+      <h3 className="text-center mb-4">Add Employee</h3>
+      <form className="flex flex-wrap -mx-2 items-start" onSubmit={handleSubmit} encType="multipart/form-data">
 
-          {/* Personal Details */}
-          <div className="col-md-6">
-            <h5>Personal Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Name</label>
-              <input
-                type="text"
-                className="form-control"
-                required
-                value={employee.name}
-                onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                required
-                value={employee.email}
-                onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                className="form-control"
-                required
-                value={employee.password}
-                onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
-              />
-            </div>
-            
-            <div className="mb-3">
-              <label className="form-label">Address</label>
-              <input
-                type="text"
-                className="form-control"
-                required
-                value={employee.address}
-                onChange={(e) => setEmployee({ ...employee, address: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Department</label>
-              <select
-                className="form-select"
-                required
-                value={employee.dept_id}
-                onChange={(e) => setEmployee({ ...employee, dept_id: e.target.value })}
-              >
-                <option value="">Select Department</option>
-                {dept.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Profile Image</label>
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={handleImage}
-              />
-            </div>
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Age</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  min="18"
-                  max="60"
-                  value={employee.age}
-                  onChange={(e) => setEmployee({ ...employee, age: e.target.value })}
-                />
+        {/* Personal Details */}
+        <div className="w-full md:w-1/2 px-2 mb-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-header bg-secondary text-white">Personal Details</div>
+            <div className="card-body">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" required value={employee.name}
+                  onChange={(e) => setEmployee({ ...employee, name: e.target.value })} />
               </div>
-              <div className="col-md-6">
-                <label className="form-label">Gender</label>
-                <select
-                  className="form-select"
-                  value={employee.gender}
-                  onChange={(e) => setEmployee({ ...employee, gender: e.target.value })}
-                >
-                  <option value="">Select</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-xl" required value={employee.email}
+                  onChange={(e) => setEmployee({ ...employee, email: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-xl" required value={employee.password}
+                  onChange={(e) => setEmployee({ ...employee, password: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" required value={employee.address}
+                  onChange={(e) => setEmployee({ ...employee, address: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Department</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white" required value={employee.dept_id}
+                  onChange={(e) => setEmployee({ ...employee, dept_id: e.target.value })}>
+                  <option value="">Select Department</option>
+                  {dept.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Profile Image</label>
+                <input type="file" className="w-full px-3 py-2 border border-gray-300 rounded-xl" accept="image/*" onChange={handleImage} />
+              </div>
+              <div className="flex flex-wrap -mx-2">
+                <div className="w-full md:w-1/2 px-2 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.dob}
+                    onChange={(e) => setEmployee({ ...employee, dob: e.target.value })} />
+                </div>
+                <div className="w-full md:w-1/2 px-2 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">Age</label>
+                  <input type="number" className="w-full px-3 py-2 border border-gray-300 rounded-xl" disabled
+                    value={employee.age !== undefined && employee.age !== null ? employee.age : ''} />
+                  {!isAgeValid && (
+                    <div className="text-danger">Age must be between 18 and 60.</div>
+                  )}
+                </div>
+                <div className="w-full md:w-1/2 px-2 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">Gender</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white" value={employee.gender}
+                    onChange={(e) => setEmployee({ ...employee, gender: e.target.value })}>
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bank Details */}
+        <div className="w-full md:w-1/2 px-2 mb-4  " >
+          <div className="card shadow-sm h-auto">
+            <div className="card-header bg-secondary text-white">Bank Details</div>
+            <div className="card-body">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Account Number</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" pattern="[0-9]{9,18}"
+                  value={employee.account_no}
+                  onChange={(e) => setEmployee({ ...employee, account_no: e.target.value })} />
+              </div>
+              <div className="flex flex-wrap -mx-2">
+                <div className="w-full md:w-1/2 px-2 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">Bank Name</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.bank_name}
+                    onChange={(e) => setEmployee({ ...employee, bank_name: e.target.value })} />
+                </div>
+                <div className="w-full md:w-1/2 px-2 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">Branch</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.branch}
+                    onChange={(e) => setEmployee({ ...employee, branch: e.target.value })} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Office Details */}
+        <div className="w-full md:w-1/2 px-2">
+  <div className="bg-white shadow-sm rounded-xl h-fit">
+    <div className="bg-secondary text-white px-4 py-2 rounded-t-md font-semibold">
+      Office Details
+    </div>
+    <div className="p-4">
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">Designation</label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 rounded-xl"
+          value={employee.designation}
+          onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">Experience</label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 rounded-xl"
+          value={employee.experience}
+          onChange={(e) => setEmployee({ ...employee, experience: e.target.value })}
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        {/* Education Details */}
+        <div className="w-full md:w-1/2 px-2  mb-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-header bg-secondary text-white">Education Details</div>
+            <div className="card-body">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">University</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.university}
+                  onChange={(e) => setEmployee({ ...employee, university: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Degree</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.degree}
+                  onChange={(e) => setEmployee({ ...employee, degree: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Branch</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.edu_branch}
+                  onChange={(e) => setEmployee({ ...employee, edu_branch: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Gradepoint</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" value={employee.gradepoint}
+                  onChange={(e) => setEmployee({ ...employee, gradepoint: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Year of Passing</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white" value={employee.yop}
+                  onChange={(e) => setEmployee({ ...employee, yop: e.target.value })}>
+                  <option value="">Select Year</option>
+                  {years.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
                 </select>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Bank Details */}
-          <div className="col-md-6">
-            <h5>Bank Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Account Number</label>
-              <input
-                type="text"
-                className="form-control"
-                pattern="[0-9]{9,18}"
-                value={employee.account_no}
-                onChange={(e) => setEmployee({ ...employee, account_no: e.target.value })}
-              />
-            </div>
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Bank Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={employee.bank_name}
-                  onChange={(e) => setEmployee({ ...employee, bank_name: e.target.value })}
-                />
+        {/* Relationship Details */}
+        <div className="w-full md:w-1/2 px-2 mb-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-header bg-secondary text-white">Relationship Details</div>
+            <div className="card-body">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Father's Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" placeholder="Optional"
+                  value={employee.father_name}
+                  onChange={(e) => setEmployee({ ...employee, father_name: e.target.value })} />
               </div>
-              <div className="col-md-6">
-                <label className="form-label">Branch</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={employee.branch}
-                  onChange={(e) => setEmployee({ ...employee, branch: e.target.value })}
-                />
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Mother's Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" placeholder="Optional"
+                  value={employee.mother_name}
+                  onChange={(e) => setEmployee({ ...employee, mother_name: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
+                <input type="tel" className="w-full px-3 py-2 border border-gray-300 rounded-xl" pattern="[0-9]{10}"
+                  value={employee.emergency_contact}
+                  onChange={(e) => setEmployee({ ...employee, emergency_contact: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Alternate Contact</label>
+                <input type="tel" className="w-full px-3 py-2 border border-gray-300 rounded-xl" pattern="[0-9]{10}"
+                  value={employee.alternate_contact}
+                  onChange={(e) => setEmployee({ ...employee, alternate_contact: e.target.value })} />
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Office Details */}
-          <div className="col-md-6">
-            <h5>Office Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Designation</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.designation}
-                onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Experience</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.experience}
-                onChange={(e) => setEmployee({ ...employee, experience: e.target.value })}
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Salary</label>
-              <input
-                type="number"
-                className="form-control"
-                required
-                value={employee.salary}
-                onChange={(e) => setEmployee({ ...employee, salary: e.target.value })}
-              />
+        {/* Government IDs */}
+        <div className="w-full md:w-1/2 px-2">
+          <div className="card shadow-sm h-fit">
+            <div className="card-header bg-secondary text-white">Government IDs</div>
+            <div className="card-body">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Aadhar Number</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl" pattern="[0-9]{12}" required
+                  title="12-digit Aadhar number" placeholder="Enter 12-digit Aadhar number"
+                  value={employee.aadhar_number}
+                  onChange={(e) => setEmployee({ ...employee, aadhar_number: e.target.value })} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">PAN Number</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-xl"
+                  pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" title="10-character PAN format (e.g., ABCDE1234F)"
+                  placeholder="Optional (e.g., ABCDE1234F)"
+                  value={employee.pan_number}
+                  onChange={(e) => setEmployee({ ...employee, pan_number: e.target.value })} />
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Education Details */}
-          <div className="col-md-6">
-            <h5>Education Details</h5>
-            <div className="mb-3">
-              <label className="form-label">University</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.university}
-                onChange={(e) => setEmployee({ ...employee, university: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Degree</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.degree}
-                onChange={(e) => setEmployee({ ...employee, degree: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Branch</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.edu_branch}
-                onChange={(e) => setEmployee({ ...employee, edu_branch: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Gradepoint</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.gradepoint}
-                onChange={(e) => setEmployee({ ...employee, gradepoint: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Year of Passing</label>
-              <select
-                className="form-select"
-                value={employee.yop}
-                onChange={(e) => setEmployee({ ...employee, yop: e.target.value })}
-              >
-                <option value="">Select Year</option>
-                {years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+        {/* Submit Button */}
+        <div className="w-full px-2">
+          <button type="submit" className="w-full px-4 py-2 font-semibold text-white bg-gray-500 rounded hover:bg-gray-400">
+            Add Employee
+          </button>
+        </div>
 
-          {/* Relationship Details */}
-          <div className="col-md-6">
-            <h5>Relationship Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Father's Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.father_name}
-                onChange={(e) => setEmployee({ ...employee, father_name: e.target.value })}
-                placeholder="Optional"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Mother's Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.mother_name}
-                onChange={(e) => setEmployee({ ...employee, mother_name: e.target.value })}
-                placeholder="Optional"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Emergency Contact</label>
-              <input
-                type="tel"
-                className="form-control"
-                pattern="[0-9]{10}"
-                value={employee.emergency_contact}
-                onChange={(e) => setEmployee({ ...employee, emergency_contact: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Alternate Contact</label>
-              <input
-                type="tel"
-                className="form-control"
-                pattern="[0-9]{10}"
-                value={employee.alternate_contact}
-                onChange={(e) => setEmployee({ ...employee, alternate_contact: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Government IDs */}
-          <div className="col-md-6">
-            <h5>Government IDs</h5>
-            <div className="mb-3">
-              <label className="form-label">Aadhar Number</label>
-              <input
-                type="text"
-                className="form-control"
-                pattern="[0-9]{12}"
-                title="12-digit Aadhar number"
-                required
-                value={employee.aadhar_number}
-                onChange={(e) => setEmployee({ ...employee, aadhar_number: e.target.value })}
-                placeholder="Enter 12-digit Aadhar number"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">PAN Number</label>
-              <input
-                type="text"
-                className="form-control"
-                pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
-                title="10-character PAN format (e.g., ABCDE1234F)"
-                value={employee.pan_number}
-                onChange={(e) => setEmployee({ ...employee, pan_number: e.target.value })}
-                placeholder="Optional (e.g., ABCDE1234F)"
-              />
-            </div>
-          </div>
-
-          <div className="col-12">
-            <button type="submit" className="btn btn-primary w-100">
-              Add Employee
-            </button>
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
-  );
-};
+  </div>
+);
+}
+
 
 export default AddEmployee;

@@ -16,6 +16,8 @@ import EmployeeAttendance from './Components/EmployeeAttendance'
 import EmployeeLogin from './Components/EmployeeLogin'
 import EmployeeDetail from './Components/EmployeeDetail'
 import PrivateRoute from './Components/PrivateRoute'
+import Projects from './Components/Projects'
+import AddProject from './Components/AddProjects';
 
 function App() {
   return (
@@ -37,8 +39,10 @@ function App() {
           <Route path='attendance' element={<AttendanceTab />} />
           <Route path='add_dept' element={<AddDept />} />
           <Route path='add_employee' element={<AddEmployee />} />
-          {/* <Route path='edit_employee/:id' element={<EditEmployee />} />
-          <Route path='employee_detail/:id' element={<EmployeeDetail />} /> */}
+          <Route path='projects' element={<Projects />} />
+          <Route path='add_projects' element={<AddProject />} />
+
+
         </Route>
 
         {/* Employee Dashboard Routes */}
