@@ -95,81 +95,89 @@ function AttendanceTab() {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: '2rem auto', padding: 20 }}>
-      <h2>Department Attendance</h2>
+  <div className="max-w-4xl mx-auto p-6">
+    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Department Attendance</h2>
 
-      {/* Department Selection */}
-      <div style={{ marginBottom: 20 }}>
-        <label>Select Department: </label>
-        <select 
-          value={selectedDept} 
-          onChange={(e) => {
-            setSelectedDept(e.target.value);
-            setSelectedDate(null);
-          }}
-          disabled={loading}
-        >
-          <option value="">Select Department</option>
-          {departments.map(dept => (
-            <option key={dept.id} value={dept.id}>{dept.name}</option>
-          ))}
-        </select>
-      </div>
+    {/* Department Selection */}
+    <div className="mb-4">
+      <label className="block text-gray-700 font-medium mb-1">Select Department:</label>
+      <select
+        value={selectedDept}
+        onChange={(e) => {
+          setSelectedDept(e.target.value);
+          setSelectedDate(null);
+        }}
+        disabled={loading}
+        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
+      >
+        <option value="">Select Department</option>
+        {departments.map((dept) => (
+          <option key={dept.id} value={dept.id}>
+            {dept.name}
+          </option>
+        ))}
+      </select>
+    </div>
 
-      {/* Date Picker */}
-      <div style={{ marginBottom: 20 }}>
-        <label>Select Date: </label>
-        <DatePicker
-          selected={selectedDate}
-          onChange={date => setSelectedDate(date)}
-          dateFormat="dd-MMM-yyyy"
-          isClearable
-          placeholderText="Choose date"
-          disabled={!selectedDept || loading}
-          maxDate={new Date()}
-        />
-      </div>
+    {/* Date Picker */}
+    <div className="mb-4">
+      <label className="block text-gray-700 font-medium mb-1">Select Date:</label>
+      <DatePicker
+        selected={selectedDate}
+        onChange={(date) => setSelectedDate(date)}
+        dateFormat="dd-MMM-yyyy"
+        isClearable
+        placeholderText="Choose date"
+        disabled={!selectedDept || loading}
+        maxDate={new Date()}
+        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
+      />
+    </div>
 
-      {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
+    {/* Error Message */}
+    {error && <div className="text-red-500 mb-4">{error}</div>}
 
-      {/* Attendance Table */}
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <table style={{ 
-          width: '100%', 
-          borderCollapse: 'collapse', 
-          marginTop: 20,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Employee</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
+    {/* Attendance Table */}
+    {loading ? (
+      <div className="text-center text-gray-600">Loading...</div>
+    ) : (
+      <div className="overflow-x-auto mt-6">
+        <table className="min-w-full border border-gray-200 shadow-sm rounded">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="text-left px-4 py-3 font-medium">Employee</th>
+              <th className="text-left px-4 py-3 font-medium">Status</th>
             </tr>
           </thead>
           <tbody>
             {!selectedDate ? (
               <tr>
-                <td colSpan={2} style={{ padding: '16px', textAlign: 'center' }}>
+                <td colSpan={2} className="text-center px-4 py-4 text-gray-500">
                   Select a date to view attendance
                 </td>
               </tr>
             ) : getAttendanceForDate().length === 0 ? (
               <tr>
-                <td colSpan={2} style={{ padding: '16px', textAlign: 'center' }}>
+                <td colSpan={2} className="text-center px-4 py-4 text-gray-500">
                   No attendance records for this date
                 </td>
               </tr>
             ) : (
               getAttendanceForDate().map((employee, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '12px' }}>{employee.name}</td>
-                  <td style={{ 
-                    padding: '12px',
-                    color: employee.status === 'Present' ? '#28a745' : 
-                          employee.status === 'Absent' ? '#dc3545' : '#6c757d'
-                  }}>
+                <tr
+                  key={index}
+                  className="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-4 py-3">{employee.name}</td>
+                  <td
+                    className={`px-4 py-3 font-medium ${
+                      employee.status === "Present"
+                        ? "text-green-600"
+                        : employee.status === "Absent"
+                        ? "text-red-500"
+                        : "text-gray-600"
+                    }`}
+                  >
                     {employee.status}
                   </td>
                 </tr>
@@ -177,9 +185,11 @@ function AttendanceTab() {
             )}
           </tbody>
         </table>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
+
 }
 
 export default AttendanceTab;

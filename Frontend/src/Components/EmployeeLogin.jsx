@@ -1,57 +1,84 @@
 import React, { useState } from 'react'
-import './style.css'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 const EmployeeLogin = () => {
-    const [values, setValues] = useState({
-        email: '',
-        password: ''
-    })
-    const [error, setError] = useState(null)
-    const navigate = useNavigate()
-    axios.defaults.withCredentials = true;
-    const handleSubmit = (event) => {
-        event.preventDefault()
-        axios.post('http://localhost:3000/employee/employee_login', values)
-        .then(result => {
-            if(result.data.loginStatus) {
-    localStorage.setItem("valid", true)
-    localStorage.setItem("employee_id", result.data.id) // 👈 this is crucial
-    navigate('/employee_dashboard/employee_detail/' + result.data.id)
-}
-else {
-                setError(result.data.Error)
-            }
-        })
-        .catch(err => console.log(err))
-    }
+  const [values, setValues] = useState({
+    email: '',
+    password: ''
+  })
+  const [error, setError] = useState(null)
+  const navigate = useNavigate()
+
+  axios.defaults.withCredentials = true
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    axios.post('http://localhost:3000/employee/employee_login', values)
+      .then(result => {
+        if (result.data.loginStatus) {
+          localStorage.setItem("valid", true)
+          localStorage.setItem("employee_id", result.data.id)
+          navigate('/employee_dashboard/employee_detail/' + result.data.id)
+        } else {
+          setError(result.data.Error)
+        }
+      })
+      .catch(err => console.log(err))
+  }
 
   return (
-    <div className='d-flex justify-content-center align-items-center vh-100 loginPage'>
-        <div className='p-3 rounded w-25 border loginForm'>
-            <div className='text-warning'>
-                {error && error}
-            </div>
-            <h2>Login Page</h2>
-            <form onSubmit={handleSubmit}>
-                <div className='mb-3'>
-                    <label htmlFor="email"><strong>Email:</strong></label>
-                    <input type="email" name='email' autoComplete='off' placeholder='Enter Email'
-                     onChange={(e) => setValues({...values, email : e.target.value})} className='form-control rounded-0'/>
-                </div>
-                <div className='mb-3'> 
-                    <label htmlFor="password"><strong>Password:</strong></label>
-                    <input type="password" name='password' placeholder='Enter Password'
-                     onChange={(e) => setValues({...values, password : e.target.value})} className='form-control rounded-0'/>
-                </div>
-                <button className='btn btn-success w-100 rounded-0 mb-2'>Log in</button>
-                <div className='d-flex align-items-center justify-content-center mb-1'> 
-                    <input type="checkbox" name="tick" id="tick" className='me-2'/>
-                    <label htmlFor="password" style={{ fontSize: '10px' }}>You agree with the terms & conditions</label>
-                </div>
-            </form>
-        </div>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-500 to-teal-400">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+        {error && (
+          <div className="text-sm text-red-600 mb-4 text-center">{error}</div>
+        )}
+        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+          Employee Login
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              autoComplete="off"
+              placeholder="Enter Email"
+              onChange={(e) => setValues({ ...values, email: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter Password"
+              onChange={(e) => setValues({ ...values, password: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition duration-300 mb-3"
+          >
+            Log in
+          </button>
+
+          <div className="flex items-center justify-center text-xs text-gray-600">
+            <input type="checkbox" id="tick" className="mr-2" />
+            <label htmlFor="tick">You agree with the terms & conditions</label>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

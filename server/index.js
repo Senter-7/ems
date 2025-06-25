@@ -2,6 +2,7 @@ import express from "express";
 import cors from 'cors'
 import { adminRouter } from "./Routes/AdminRoute.js";
 import { EmployeeRouter } from "./Routes/EmployeeRoute.js";
+import { HRRouter } from "./Routes/HRRoute.js";
 import Jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use('/auth', adminRouter)
 app.use('/employee', EmployeeRouter)
+app.use('/hr', HRRouter)
 app.use(express.static('Public'))
 
 const verifyUser = (req, res, next) => {
