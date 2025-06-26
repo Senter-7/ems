@@ -5,7 +5,6 @@ import { useNavigate, useParams } from "react-router-dom";
 const editableFields = [
   { label: "Name", value: "name" },
   { label: "Email", value: "email" },
-  { label: "Salary", value: "salary" },
   { label: "Address", value: "address" },
   { label: "Department", value: "dept_id" },
   { label: "Age", value: "age" },
@@ -17,7 +16,6 @@ const EditEmployee = () => {
   const [employee, setEmployee] = useState({
     name: "",
     email: "",
-    salary: "",
     address: "",
     dept_id: "",
     age: "",
@@ -33,7 +31,7 @@ const EditEmployee = () => {
 
   useEffect(() => {
     // Fetch departments
-    axios.get("http://localhost:3000/auth/department")
+    axios.get("http://localhost:3000/auth/dept")
       .then((result) => {
         if (result.data.Status) {
           setDept(result.data.Result);
@@ -138,7 +136,7 @@ const EditEmployee = () => {
             ) : (
               <input
                 type={
-                  selectedField === "salary" || selectedField === "age"
+                  selectedField === "age"
                     ? "number"
                     : "text"
                 }
