@@ -104,6 +104,25 @@ router.get("/attendance/present/:employee_id/:month", (req, res) => {
   });
 });
 
+router.post("/update_salary/:id", (req, res) => {
+  const employeeId = req.params.id;
+  const { salary } = req.body;
+
+  // Basic validation
+  if (!salary || isNaN(salary)) {
+    return res.json({ Status: false, Error: "Invalid salary input" });
+  }
+
+  const sql = "UPDATE employee SET salary = ? WHERE id = ?";
+  con.query(sql, [salary, employeeId], (err, result) => {
+    if (err) {
+      console.error("Error updating salary:", err);
+      return res.json({ Status: false, Error: "Database error" });
+    }
+    return res.json({ Status: true, Result: result });
+  });
+});
+
 // ============================
 // LOGOUT
 // ============================
