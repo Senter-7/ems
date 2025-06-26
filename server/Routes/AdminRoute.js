@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import db from '../utils/db.js'; // Import the pool
 
 const router = express.Router();
 
@@ -234,7 +235,7 @@ router.delete("/delete_employee/:id", (req, res) => {
       }
 
       const imageFile = fetchResult[0].image;
-      const childTables = ["leaves", "attendance", "tasks"];
+      const childTables = ["leaves", "attendance"];
       const deleteOperations = [];
 
       childTables.forEach(table => {
@@ -293,6 +294,7 @@ router.delete("/delete_employee/:id", (req, res) => {
     });
   });
 });
+
 
 router.get("/employee", (req, res) => {
   const sql = `SELECT e.*, d.name AS dept_name 

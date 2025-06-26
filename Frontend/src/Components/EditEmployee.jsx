@@ -1,15 +1,19 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+
+const editableFields = [
+  { label: "Name", value: "name" },
+  { label: "Email", value: "email" },
+  { label: "Salary", value: "salary" },
+  { label: "Address", value: "address" },
+  { label: "Department", value: "dept_id" },
+  { label: "Age", value: "age" },
+  { label: "Gender", value: "gender" },
+  // Add more fields as needed
+];
 
 const EditEmployee = () => {
-  const { id } = useParams();
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1970 + 1 }, (_, index) => 1970 + index);
-  const userRole = localStorage.getItem("userRole");
-  const isEmployee = userRole === "employee";
-
-  // State for form, original data, and image
   const [employee, setEmployee] = useState({
     name: "",
     email: "",
@@ -18,368 +22,142 @@ const EditEmployee = () => {
     dept_id: "",
     age: "",
     gender: "",
-    account_no: "",
-    bank_name: "",
-    branch: "",
-    university: "",
-    degree: "",
-    edu_branch: "",
-    gradepoint: "",
-    yop: "",
-    father_name: "",
-    mother_name: "",
-    emergency_contact: "",
-    alternate_contact: "",
-    aadhar_number: "",
-    pan_number: ""
+    // Add more fields as needed
   });
-  
+
   const [originalEmployee, setOriginalEmployee] = useState({});
   const [dept, setDept] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [selectedField, setSelectedField] = useState("");
   const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
-    axios.get('http://localhost:3000/auth/dept')
-      .then(result => {
+    // Fetch departments
+    axios.get("http://localhost:3000/auth/department")
+      .then((result) => {
         if (result.data.Status) {
           setDept(result.data.Result);
         } else {
           alert(result.data.Error);
         }
-      }).catch(err => console.log(err));
+      })
+      .catch((err) => console.log(err));
 
-    axios.get('http://localhost:3000/employee_dashboard/employee/' + id)
-      .then(result => {
-        const empData = result.data.Result[0];
-        const transformedData = {
-          ...empData,
-          dept_id: empData.dept_id?.toString() || "",
-          yop: empData.yop?.toString() || "",
-          degree: empData.degree || "",
-          edu_branch: empData.edu_branch || "",
-          gradepoint: empData.gradepoint || ""
-        };
-        
-        setEmployee(transformedData);
-        setOriginalEmployee(transformedData); // Store original data
-      }).catch(err => console.log(err));
+    // Fetch employee data
+    axios.get("http://localhost:3000/auth/get_employee/" + id)
+      .then((result) => {
+        setEmployee(result.data.Result[0]);
+        setOriginalEmployee(result.data.Result[0]);
+      })
+      .catch((err) => console.log(err));
   }, [id]);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImageFile(file);
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  
-
-  // Get only changed fields
-  const getChangedFields = () => {
-    const changed = {};
-    Object.keys(employee).forEach(key => {
-      if (employee[key] !== originalEmployee[key]) {
-        changed[key] = employee[key];
-      }
-    });
-    return changed;
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const changedFields = getChangedFields();
-    
-    if (Object.keys(changedFields).length === 0) {
-      alert('No changes detected');
+    if (!selectedField) {
+      alert("Please select a field to edit.");
       return;
     }
-    
-    axios.put('http://localhost:3000/auth/edit_employee/' + id, changedFields)
-      .then(result => {
+    if (employee[selectedField] === originalEmployee[selectedField]) {
+      alert("No changes detected.");
+      return;
+    }
+    const changedField = { [selectedField]: employee[selectedField] };
+
+    axios
+      .put("http://localhost:3000/auth/edit_employee/" + id, changedField)
+      .then((result) => {
         if (result.data.Status) {
-          navigate('/employee_dashboard/employee');
+          navigate(`/employee_dashboard/employee_detail/${id}`);
         } else {
           alert(result.data.Error);
         }
-      }).catch(err => console.log(err));
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const handleFieldChange = (e) => {
+    setSelectedField(e.target.value);
+  };
+
+  const handleInputChange = (e) => {
+    setEmployee({ ...employee, [selectedField]: e.target.value });
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center mt-3">
-      <div className="p-3 rounded w-75 border">
-        <h3 className="text-center">Edit Employee</h3>
-        <form className="row g-3" onSubmit={handleSubmit}>
-          {/* Profile Picture Section */}
-          <div className="col-12">
-            <div className="mb-3 text-center">
-              <label className="form-label d-block">Profile Picture</label>
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Profile Preview"
-                  className="mb-2"
-                  style={{ 
-                    width: "100px", 
-                    height: "100px", 
-                    objectFit: "cover", 
-                    borderRadius: "50%",
-                    border: "2px solid #ddd"
-                  }}
-                />
-              )}
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </div>
-          </div>
+    <div className="container mt-4">
+      <h3>Edit Employee</h3>
+      <form onSubmit={handleSubmit} className="mt-3" style={{ maxWidth: 500 }}>
+        {/* Dropdown to select field */}
+        <div className="mb-3">
+          <label className="form-label">Select Field to Edit</label>
+          <select
+            className="form-select"
+            value={selectedField}
+            onChange={handleFieldChange}
+          >
+            <option value="">-- Select Field --</option>
+            {editableFields.map((field) => (
+              <option key={field.value} value={field.value}>
+                {field.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {/* Personal Details */}
-          <div className="col-md-6">
-            <h5>Personal Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.name}
-                onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
-                readOnly={isEmployee}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                value={employee.email}
-                onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-                readOnly={isEmployee}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Salary</label>
-              <input
-                type="number"
-                className="form-control"
-                value={employee.salary}
-                onChange={(e) => setEmployee({ ...employee, salary: e.target.value })}
-                readOnly={isEmployee}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Address</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.address}
-                onChange={(e) => setEmployee({ ...employee, address: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Department</label>
+        {/* Conditionally render the input for the selected field */}
+        {selectedField && (
+          <div className="mb-3">
+            <label className="form-label">
+              {editableFields.find((f) => f.value === selectedField)?.label}
+            </label>
+            {selectedField === "dept_id" ? (
               <select
                 className="form-select"
                 value={employee.dept_id}
-                onChange={(e) => setEmployee({ ...employee, dept_id: e.target.value })}
+                onChange={handleInputChange}
               >
+                <option value="">-- Select Department --</option>
                 {dept.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
                 ))}
               </select>
-            </div>
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Age</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  min="18"
-                  max="60"
-                  value={employee.age}
-                  onChange={(e) => setEmployee({ ...employee, age: e.target.value })}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Gender</label>
-                <select
-                  className="form-select"
-                  value={employee.gender}
-                  onChange={(e) => setEmployee({ ...employee, gender: e.target.value })}
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Bank Details */}
-          <div className="col-md-6">
-            <h5>Bank Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Account Number</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.account_no}
-                onChange={(e) => setEmployee({ ...employee, account_no: e.target.value })}
-              />
-            </div>
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Bank Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={employee.bank_name}
-                  onChange={(e) => setEmployee({ ...employee, bank_name: e.target.value })}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Branch</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={employee.branch}
-                  onChange={(e) => setEmployee({ ...employee, branch: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Education Details */}
-          <div className="col-md-6">
-            <h5>Education Details</h5>
-            <div className="mb-3">
-              <label className="form-label">University</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.university}
-                onChange={(e) => setEmployee({ ...employee, university: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Degree</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.degree}
-                onChange={(e) => setEmployee({ ...employee, degree: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Branch</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.edu_branch}
-                onChange={(e) => setEmployee({ ...employee, edu_branch: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">gradepoint</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.gradepoint}
-                onChange={(e) => setEmployee({ ...employee, gradepoint: e.target.value })}
-                readOnly={isEmployee}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Year of Passing</label>
+            ) : selectedField === "gender" ? (
               <select
                 className="form-select"
-                value={employee.yop}
-                onChange={(e) => setEmployee({ ...employee, yop: e.target.value })}
+                value={employee.gender}
+                onChange={handleInputChange}
               >
-                <option value="">Select Year</option>
-                {years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
+                <option value="">-- Select Gender --</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
               </select>
-            </div>
+            ) : (
+              <input
+                type={
+                  selectedField === "salary" || selectedField === "age"
+                    ? "number"
+                    : "text"
+                }
+                className="form-control"
+                value={employee[selectedField] || ""}
+                onChange={handleInputChange}
+              />
+            )}
           </div>
+        )}
 
-          {/* Relationship Details */}
-          <div className="col-md-6">
-            <h5>Relationship Details</h5>
-            <div className="mb-3">
-              <label className="form-label">Father's Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.father_name}
-                onChange={(e) => setEmployee({ ...employee, father_name: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Mother's Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.mother_name}
-                onChange={(e) => setEmployee({ ...employee, mother_name: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Emergency Contact</label>
-              <input
-                type="tel"
-                className="form-control"
-                value={employee.emergency_contact}
-                onChange={(e) => setEmployee({ ...employee, emergency_contact: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Alternate Contact</label>
-              <input
-                type="tel"
-                className="form-control"
-                value={employee.alternate_contact}
-                onChange={(e) => setEmployee({ ...employee, alternate_contact: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Government IDs */}
-          <div className="col-md-6">
-            <h5>Government IDs</h5>
-            <div className="mb-3">
-              <label className="form-label">Aadhar Number</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.aadhar_number}
-                onChange={(e) => setEmployee({ ...employee, aadhar_number: e.target.value })}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">PAN Number</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employee.pan_number}
-                onChange={(e) => setEmployee({ ...employee, pan_number: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="col-12">
-            <button type="submit" className="btn btn-primary w-100">
-              Update Employee
-            </button>
-          </div>
-        </form>
-      </div>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={!selectedField}
+        >
+          Update
+        </button>
+      </form>
     </div>
   );
 };

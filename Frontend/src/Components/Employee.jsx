@@ -19,17 +19,36 @@ const Employee = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  const handleDelete = (id) => {
-    axios
-      .delete("http://localhost:3000/auth/delete_employee/" + id)
-      .then((result) => {
-        if (result.data.Status) {
-          window.location.reload();
-        } else {
-          alert(result.data.Error);
-        }
-      });
-  };
+const handleDelete = (id) => {
+  axios
+    .delete(`http://localhost:3000/auth/delete_employee/${id}`)
+    .then((result) => {
+      if (result.data.Status) {
+        // Remove the deleted employee from the state without reloading the page
+        setEmployee((prev) => prev.filter((emp) => emp.id !== id));
+        alert("Employee deleted successfully.");
+      } else {
+        alert(result.data.Error || "Deletion failed.");
+      }
+    })
+    .catch((error) => {
+      if (error.response) {
+        // Server responded with an error
+        const details = error.response.data?.Details;
+        const errMsg = error.response.data?.Error || error.response.data?.message || "Server error during deletion.";
+        alert(details ? `${errMsg}: ${details}` : errMsg);
+        console.error("Delete error details:", error.response.data);
+      } else if (error.request) {
+        // No response received from server
+        alert("Network error: No response from server.");
+        console.error("No response:", error.request);
+      } else {
+        // Error setting up the request
+        alert("Request error: " + error.message);
+        console.error("Request setup error:", error.message);
+      }
+    });
+};
 
   return (
     <div className="px-5 mt-3">

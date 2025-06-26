@@ -28,6 +28,7 @@ function App() {
         <Route path='/' element={<Start />} />
         <Route path='/adminlogin' element={<Login />} />
         <Route path='/employee_login' element={<EmployeeLogin />} />
+        
 
         {/* Admin Dashboard Routes */}
         <Route path='/dashboard' element={
