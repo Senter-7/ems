@@ -10,7 +10,7 @@ const router = express.Router()
 // ============================
 router.post("/HR_login", (req, res) => {
     
-    const sql = "SELECT employee.id AS employee_id, employee.name AS employee_name, employee.email,  employee.password,employee.salary,  employee.address,  employee.image,  employee.dept_id,  employee.designation,  employee.experience,  employee.degree,  employee.edu_branch,  employee.gradepoint,  employee.alternate_contact,  employee.age,  employee.gender,  employee.account_no,  employee.bank_name,  employee.branch,  employee.university,  employee.yop,  employee.father_name,  employee.mother_name,  employee.emergency_contact,  employee.aadhar_number,  employee.pan_number,  employee.dob, dept.id AS dept_id,dept.name AS dept_name FROM employee INNER JOIN dept ON employee.dept_id = dept.id WHERE employee.email = 'neha.sharma@example.com' AND dept.name = 'HR' ";
+    const sql = "SELECT employee.id AS employee_id, employee.name AS employee_name, employee.email,  employee.password,employee.salary,  employee.address,  employee.image,  employee.dept_id,  employee.designation,  employee.experience,  employee.degree,  employee.edu_branch,  employee.gradepoint,  employee.alternate_contact,  employee.age,  employee.gender,  employee.account_no,  employee.bank_name,  employee.branch,  employee.university,  employee.yop,  employee.father_name,  employee.mother_name,  employee.emergency_contact,  employee.aadhar_number,  employee.pan_number,  employee.dob, dept.id AS dept_id,dept.name AS dept_name FROM employee INNER JOIN dept ON employee.dept_id = dept.id WHERE employee.email = ? AND dept.name = 'HR' ";
     con.query(sql, [req.body.email], (err, result) => {
        
         if (err) return res.json({ loginStatus: false, Error: "Query error" });
