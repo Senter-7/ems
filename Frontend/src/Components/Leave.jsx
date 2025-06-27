@@ -82,108 +82,125 @@ const Leave = () => {
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
-    <div className="container mt-4" style={{ maxWidth: 700 }}>
-      <h3 className="mb-4 text-center">Apply for Leave</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label"><strong>Start Date</strong></label>
-          <DatePicker
-            selected={startDate}
-            onChange={date => setStartDate(date)}
-            dateFormat="yyyy-MM-dd"
-            className="form-control"
-            placeholderText="Select start date"
-            minDate={new Date()}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label"><strong>End Date</strong></label>
-          <DatePicker
-            selected={endDate}
-            onChange={date => setEndDate(date)}
-            dateFormat="yyyy-MM-dd"
-            className="form-control"
-            placeholderText="Select end date"
-            minDate={startDate || new Date()}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label"><strong>Type of Leave</strong></label>
-          <select
-            className="form-select"
-            value={type}
-            onChange={e => setType(e.target.value)}
-            required
-          >
-            <option value="casual">Casual</option>
-            <option value="sick">Sick</option>
-            <option value="vacation">Vacation</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label className="form-label"><strong>Purpose of Leave</strong></label>
-          <textarea
-            className="form-control"
-            value={purpose}
-            onChange={e => setPurpose(e.target.value)}
-            rows={3}
-            placeholder="Enter purpose"
-            required
-          />
-        </div>
-        <div className="d-grid">
-          <button className="btn btn-primary" type="submit">
-            Apply
-          </button>
-        </div>
-        {message && (
-          <div className="alert alert-info mt-3 text-center">{message}</div>
-        )}
-      </form>
+  <div className="max-w-3xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+    <h3 className="text-2xl font-semibold text-center mb-6">Apply for Leave</h3>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Start Date */}
+      <div>
+        <label className="block font-medium mb-1">Start Date</label>
+        <DatePicker
+          selected={startDate}
+          onChange={date => setStartDate(date)}
+          dateFormat="yyyy-MM-dd"
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholderText="Select start date"
+          minDate={new Date()}
+          required
+        />
+      </div>
 
-      {/* Leave History Table */}
-      <div className="mt-5">
-        <h4 className="mb-3 text-center">Leave History</h4>
-        {loading ? (
-          <div className="text-center">Loading leave history...</div>
-        ) : (
-          <table className="table table-bordered">
-            <thead>
+      {/* End Date */}
+      <div>
+        <label className="block font-medium mb-1">End Date</label>
+        <DatePicker
+          selected={endDate}
+          onChange={date => setEndDate(date)}
+          dateFormat="yyyy-MM-dd"
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholderText="Select end date"
+          minDate={startDate || new Date()}
+          required
+        />
+      </div>
+
+      {/* Leave Type */}
+      <div>
+        <label className="block font-medium mb-1">Type of Leave</label>
+        <select
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={type}
+          onChange={e => setType(e.target.value)}
+          required
+        >
+          <option value="casual">Casual</option>
+          <option value="sick">Sick</option>
+          <option value="vacation">Vacation</option>
+        </select>
+      </div>
+
+      {/* Purpose */}
+      <div>
+        <label className="block font-medium mb-1">Purpose of Leave</label>
+        <textarea
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={purpose}
+          onChange={e => setPurpose(e.target.value)}
+          rows={3}
+          placeholder="Enter purpose"
+          required
+        />
+      </div>
+
+      {/* Submit */}
+      <div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-lg font-medium"
+        >
+          Apply
+        </button>
+      </div>
+
+      {/* Message */}
+      {message && (
+        <div className="text-center text-blue-600 mt-4">{message}</div>
+      )}
+    </form>
+
+    {/* Leave History Table */}
+    <div className="mt-10">
+      <h4 className="text-xl font-semibold text-center mb-4">Leave History</h4>
+      {loading ? (
+        <div className="text-center text-gray-600">Loading leave history...</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead className="bg-gray-100 text-left text-sm font-semibold text-gray-700">
               <tr>
-                <th>Leave ID</th>
-                <th>Type</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Duration (days)</th>
-                <th>Purpose</th>
-                <th>Status</th>
+                <th className="px-4 py-2 border-b">Leave ID</th>
+                <th className="px-4 py-2 border-b">Type</th>
+                <th className="px-4 py-2 border-b">Start Date</th>
+                <th className="px-4 py-2 border-b">End Date</th>
+                <th className="px-4 py-2 border-b">Duration</th>
+                <th className="px-4 py-2 border-b">Purpose</th>
+                <th className="px-4 py-2 border-b">Status</th>
               </tr>
             </thead>
             <tbody>
               {leaves.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center">No leave applications found.</td>
+                  <td colSpan={7} className="text-center text-gray-500 py-4">
+                    No leave applications found.
+                  </td>
                 </tr>
               ) : (
-                leaves.map(leave => (
-                  <tr key={leave.leave_id}>
-                    <td>{leave.leave_id}</td>
-                    <td>{capitalize(leave.leave_type)}</td>
-                    <td>{leave.start_date}</td>
-                    <td>{leave.end_date}</td>
-                    <td>{getDuration(leave.start_date, leave.end_date)}</td>
-                    <td>{leave.purpose}</td>
-                    <td>
+                leaves.map((leave) => (
+                  <tr key={leave.leave_id} className="text-sm text-gray-800">
+                    <td className="px-4 py-2 border-b">{leave.leave_id}</td>
+                    <td className="px-4 py-2 border-b">{capitalize(leave.leave_type)}</td>
+                    <td className="px-4 py-2 border-b">{leave.start_date}</td>
+                    <td className="px-4 py-2 border-b">{leave.end_date}</td>
+                    <td className="px-4 py-2 border-b">{getDuration(leave.start_date, leave.end_date)}</td>
+                    <td className="px-4 py-2 border-b">{leave.purpose}</td>
+                    <td className="px-4 py-2 border-b">
                       <span
-                        className={
+                        className={`font-medium ${
                           leave.status === "approved"
-                            ? "text-success"
+                            ? "text-green-600"
                             : leave.status === "denied"
-                            ? "text-danger"
-                            : "text-secondary"
-                        }
+                            ? "text-red-600"
+                            : "text-gray-500"
+                        }`}
                       >
                         {capitalize(leave.status)}
                       </span>
@@ -193,10 +210,12 @@ const Leave = () => {
               )}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Leave;

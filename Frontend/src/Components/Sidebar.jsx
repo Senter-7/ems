@@ -58,12 +58,7 @@ const Sidebar = ({ role, employee }) => {
               <span className="ms-2 d-none d-sm-inline">Department</span>
             </Link>
           </li>
-          <li className="w-100">
-            <Link to="/dashboard/attendance" className="nav-link text-white px-0 align-middle">
-              <i className="fs-4 bi-person ms-2"></i>
-              <span className="ms-2 d-none d-sm-inline">Attendance</span>
-            </Link>
-          </li>
+          
           <li className="w-100">
             <Link to="/dashboard/leave" className="nav-link text-white px-0 align-middle">
               <i className="fs-4 bi-person ms-2"></i>
