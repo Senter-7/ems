@@ -5,7 +5,7 @@ import { EmployeeRouter } from "./Routes/EmployeeRoute.js";
 import { HRRouter } from "./Routes/HRRoute.js";
 import Jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-
+//change
 const app = express() 
 app.use(cors({
     origin: ["https://ems-qbsptovm2-senter-7s-projects.vercel.app"],
