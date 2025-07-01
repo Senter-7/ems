@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 //change
 const app = express() 
 app.use(cors({
-    origin: ["https://ems-qbsptovm2-senter-7s-projects.vercel.app"],
+    origin: ["https://ems-coral-six.vercel.app/"],
     methods: ['GET', 'POST', 'PUT', "DELETE"],
     credentials: true
 }))
