@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import db from '../utils/db.js'; // Import the pool
+
 
 const router = express.Router();
 
