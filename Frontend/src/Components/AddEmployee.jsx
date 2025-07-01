@@ -14,8 +14,8 @@ const AddEmployee = () => {
    
     address: "",
     dept_id: "",
-    designation: "",      // Added for Office Details
-    experience: "",       // Added for Office Details
+    designation: "",      
+    experience: "",       
     image: "",
     dob: "",
     age: "",
