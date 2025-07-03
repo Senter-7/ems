@@ -6,7 +6,7 @@ const Projects = () => {
     const [projects, setProjects] = useState([])
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_API_URL}/api/projects`)
+        axios.get(`${import.meta.env.VITE_API_URL}/auth/projects`)
             .then(result => {
                 if (result.data.Status) {
                     setProjects(result.data.Result)
@@ -18,30 +18,38 @@ const Projects = () => {
 
     return (
         <div className='px-5 mt-3'>
-            <div className='d-flex justify-content-center'>
+            <div className='d-flex justify-content-between align-items-center'>
                 <h3>Project List</h3>
+                <Link to="/dashboard/add_projects" className='btn btn-success'>Add Project</Link>
             </div>
-            <Link to="/dashboard/add_projects" className='btn btn-success'>Add Project</Link>
             <div className='mt-3'>
-                <table className='table'>
-                    <thead>
+                <table className='table table-bordered'>
+                    <thead className="table-dark">
                         <tr>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Start Date</th>
                             <th>End Date</th>
+                            <th>Status</th>
                             <th>Department</th>
+                            <th>Manager</th>
+                            <th>Client</th>
+                            <th>Budget</th>
                         </tr>
                     </thead>
                     <tbody>
                         {
                             projects.map(project => (
-                                <tr key={project.id}>
+                                <tr key={project.project_id}>
                                     <td>{project.name}</td>
                                     <td>{project.description}</td>
                                     <td>{project.start_date}</td>
-                                    <td>{project.end_date}</td>
-                                    <td>{project.dept_name}</td>
+                                    <td>{project.end_date || '—'}</td>
+                                    <td>{project.status}</td>
+                                    <td>{project.dept_name || '—'}</td>
+                                    <td>{project.manager_name || '—'}</td>
+                                    <td>{project.client_name || '—'}</td>
+                                    <td>₹{project.budget?.toLocaleString() || '—'}</td>
                                 </tr>
                             ))
                         }
