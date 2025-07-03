@@ -31,7 +31,7 @@ const AddProject = () => {
             }).catch(err => console.log(err));
 
         // Fetch managers (assuming employees endpoint returns only managers or all with filtering)
-        axios.get(`${import.meta.env.VITE_API_URL}/auth/employees`)
+        axios.get(`${import.meta.env.VITE_API_URL}/auth/employee`)
             .then(result => {
                 if (result.data.Status) {
                     setManagers(result.data.Result);
