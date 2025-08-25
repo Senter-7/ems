@@ -69,17 +69,27 @@ const HRLogin = () => {
             />
           </div>
 
+          <div className="flex items-center justify-center mt-4 mb-4">
+            <input
+              type="checkbox"
+              name="tick"
+              id="tick"
+              className="mr-2"
+              required
+              onInvalid={e => e.target.setCustomValidity('You must agree to the terms and conditions')}
+              onInput={e => e.target.setCustomValidity('')}
+            />
+            <label htmlFor="tick" className="text-xs text-gray-600">
+              You agree with the terms & conditions
+            </label>
+          </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition duration-300 mb-3"
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition duration-300"
           >
             Log in
           </button>
-
-          <div className="flex items-center justify-center text-xs text-gray-600">
-            <input type="checkbox" id="tick" className="mr-2" />
-            <label htmlFor="tick">You agree with the terms & conditions</label>
-          </div>
         </form>
       </div>
     </div>

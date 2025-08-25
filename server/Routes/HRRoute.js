@@ -123,9 +123,61 @@ router.post("/update_salary/:id", (req, res) => {
   });
 });
 
-// ============================
+// Approve Leave Functionality 
+router.get('/leaves/:deptId', (req, res) => {
+  const deptId = req.params.deptId;
+  const sql = `SELECT l.leave_id, l.employee_id, e.name AS employee_name,
+      l.start_date, l.end_date, l.leave_type, l.purpose, l.status
+    FROM leaves l JOIN employee e ON l.employee_id = e.id
+    WHERE e.dept_id = ? ORDER BY l.start_date DESC`;
+  con.query(sql, [deptId], (err, result) => {
+    if (err) return res.json({ Status: false, Error: err.message });
+    return res.json({ Status: true, Result: result });
+  });
+});
+
+router.post('/leave_action', (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
+
+  jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+    if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
+    
+    const { leave_id, status } = req.body;
+    if (!leave_id || !['approved', 'denied'].includes(status)) {
+      return res.status(400).json({ Status: false, Error: "Invalid input" });
+    }
+
+    const sql = `UPDATE leaves SET status = ? WHERE leave_id = ?`;
+    con.query(sql, [status, leave_id], (err, result) => {
+      if (err) return res.status(500).json({ Status: false, Error: "Database error", Details: err.message });
+      if (result.affectedRows === 0) return res.status(404).json({ Status: false, Error: "Leave not found" });
+      return res.json({ Status: true, Message: "Leave status updated" });
+    });
+  });
+});
+
+// Add department list
+router.get('/dept', (req, res) => {
+  const sql = `
+    SELECT 
+      d.id,
+      d.name,
+      COUNT(DISTINCT e.id) AS member_count,
+      COALESCE(SUM(p.budget), 0) AS total_budget
+    FROM dept d
+    LEFT JOIN employee e ON d.id = e.dept_id
+    LEFT JOIN projects p ON d.id = p.dept_id
+    GROUP BY d.id, d.name
+    ORDER BY d.name
+  `;
+  con.query(sql, (err, result) => {
+    if (err) return res.json({ Status: false, Error: 'Query Error' });
+    return res.json({ Status: true, Result: result });
+  });
+});
+
 // LOGOUT
-// ============================
 router.get("/logout", (req, res) => {
     res.clearCookie("token");
     return res.json({ Status: true });

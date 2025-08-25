@@ -9,7 +9,7 @@ const editableFields = [
   { label: "Department", value: "dept_id" },
   { label: "Age", value: "age" },
   { label: "Gender", value: "gender" },
-  // Add more fields as needed
+ 
 ];
 
 const EditEmployee = () => {
@@ -20,7 +20,6 @@ const EditEmployee = () => {
     dept_id: "",
     age: "",
     gender: "",
-    // Add more fields as needed
   });
 
   const [originalEmployee, setOriginalEmployee] = useState({});

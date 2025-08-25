@@ -11,7 +11,7 @@ const app = express();
 
 app.use(cors({
   origin: [
-    "http://localhost:5173",                 
+    "http://localhost:4173",                 
     "https://ems-coral-six.vercel.app"       
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -21,7 +21,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/auth', adminRouter);
+app.use('/auth' ,adminRouter);
 app.use('/employee', EmployeeRouter);
 app.use('/hr', HRRouter);
 
@@ -42,7 +42,7 @@ const verifyUser = (req, res, next) => {
 };
 
 app.get("/", (req, res) => {
-  res.send("✅ Backend is running on Render.");
+  res.send("Backend is running on Render.");
 });
 
 app.get('/verify', verifyUser, (req, res) => {

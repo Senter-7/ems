@@ -20,7 +20,6 @@ const AddProject = () => {
     const [managers, setManagers] = useState([]);
 
     useEffect(() => {
-        // Fetch departments
         axios.get(`${import.meta.env.VITE_API_URL}/auth/dept`)
             .then(result => {
                 if (result.data.Status) {
@@ -30,7 +29,6 @@ const AddProject = () => {
                 }
             }).catch(err => console.log(err));
 
-        // Fetch managers (assuming employees endpoint returns only managers or all with filtering)
         axios.get(`${import.meta.env.VITE_API_URL}/auth/employee`)
             .then(result => {
                 if (result.data.Status) {

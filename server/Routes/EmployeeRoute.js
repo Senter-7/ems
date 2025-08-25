@@ -56,7 +56,7 @@ router.get('/:id', (req, res) => {
                 Status: true, 
                 Result: {
                     ...result[0],
-                    dept_id: result[0].dept_id?.toString()  // Ensure string type for consistency
+                    dept_id: result[0].dept_id?.toString()  //Ensure string type for consistency
                 }
             });
         } else {
@@ -113,11 +113,7 @@ router.post("/add_employee", (req, res) => {
 
 
 
-// --------------------------
-// Attendance Routes
-// --------------------------
 
-// Mark Attendance (Present/Absent)
 router.post('/attendance', (req, res) => {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ Status: false, Error: "Not authenticated" });
@@ -268,7 +264,7 @@ router.post('/apply_leave', (req, res) => {
   jwt.verify(token, "jwt_secret_key", (err, decoded) => {
     if (err) return res.status(403).json({ Status: false, Error: "Invalid token" });
 
-    const employee_id = decoded.id; // Correctly get employee id
+    const employee_id = decoded.id; 
     const { start_date, end_date, leave_type, purpose } = req.body;
     const sql = `
       INSERT INTO leaves (employee_id, start_date, end_date, leave_type, purpose, status)

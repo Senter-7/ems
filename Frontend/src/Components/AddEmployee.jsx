@@ -11,7 +11,6 @@ const AddEmployee = () => {
     name: "",
     email: "",
     password: "",
-   
     address: "",
     dept_id: "",
     designation: "",      
@@ -31,7 +30,7 @@ const AddEmployee = () => {
     father_name: "",
     mother_name: "",
     emergency_contact: "",
-    alternate_contact: "", // Added for Emergency Contacts
+    alternate_contact: "",
     aadhar_number: "",
     pan_number: ""
   });
@@ -52,7 +51,6 @@ const AddEmployee = () => {
   const calculateAge = (dob) => {
     const dobDate = new Date(dob);
     if (isNaN(dobDate)) {
-      // If dobDate is invalid, return null or handle the error appropriately
       console.error('Invalid Date of Birth');
       return '';
     }
@@ -116,15 +114,11 @@ const AddEmployee = () => {
     formData.append("gradepoint", employee.gradepoint);
     formData.append("yop", employee.yop);
     formData.append("dob", employee.dob);
-
-
-    // Optional fields: send as "" if blank
     formData.append("father_name", employee.father_name || "");
     formData.append("mother_name", employee.mother_name || "");
     formData.append("pan_number", employee.pan_number || "");
-
     formData.append("emergency_contact", employee.emergency_contact);
-    formData.append("alternate_contact", employee.alternate_contact); // Emergency Contacts
+    formData.append("alternate_contact", employee.alternate_contact); 
     formData.append("aadhar_number", employee.aadhar_number);
 
     axios
@@ -145,7 +139,7 @@ return (
       <h3 className="text-center mb-4">Add Employee</h3>
       <form className="flex flex-wrap -mx-2 items-start" onSubmit={handleSubmit} encType="multipart/form-data">
 
-        {/* Personal Details */}
+       
         <div className="w-full md:w-1/2 px-2 mb-4">
           <div className="card shadow-sm h-100">
             <div className="card-header bg-secondary text-white">Personal Details</div>
@@ -242,32 +236,32 @@ return (
 
         {/* Office Details */}
         <div className="w-full md:w-1/2 px-2">
-  <div className="bg-white shadow-sm rounded-xl h-fit">
-    <div className="bg-secondary text-white px-4 py-2 rounded-t-md font-semibold">
-      Office Details
-    </div>
-    <div className="p-4">
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Designation</label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-xl"
-          value={employee.designation}
-          onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Experience</label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-xl"
-          value={employee.experience}
-          onChange={(e) => setEmployee({ ...employee, experience: e.target.value })}
-        />
-      </div>
-    </div>
-  </div>
-</div>
+          <div className="bg-white shadow-sm rounded-xl h-fit">
+            <div className="bg-secondary text-white px-4 py-2 rounded-t-md font-semibold">
+              Office Details
+            </div>
+            <div className="p-4">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Designation</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl"
+                  value={employee.designation}
+                  onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Experience</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl"
+                  value={employee.experience}
+                  onChange={(e) => setEmployee({ ...employee, experience: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
 
         {/* Education Details */}

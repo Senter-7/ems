@@ -56,7 +56,7 @@ const SetSalary = () => {
       setSalaryInput("");
     } else {
       setEditingSalaryId(id);
-      setSalaryInput(currentSalary); // prefill with current salary
+      setSalaryInput(currentSalary); 
     }
   };
 
@@ -70,7 +70,6 @@ const SetSalary = () => {
         alert("Salary updated");
         setEditingSalaryId(null);
         setSalaryInput("");
-        // Refetch employees
         const result = await axios.get(`${import.meta.env.VITE_API_URL}/auth/employee`);
         if (result.data.Status) setEmployee(result.data.Result);
       } else {
@@ -133,7 +132,7 @@ const SetSalary = () => {
                     </td>
                   </tr>
 
-                  {/* Salary breakdown dropdown */}
+                  
                   {visibleDropdown === e.id && (
                     <tr className="bg-gray-50">
                       <td colSpan={7} className="px-6 py-3">

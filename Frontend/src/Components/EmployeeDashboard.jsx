@@ -19,9 +19,7 @@ const EmployeeDashboard = () => {
       <div className="row flex-nowrap">
         <Sidebar role="employee" employee={employee} />
         <div className="col p-0 m-0 main-content-scroll">
-          <div className="p-2 d-flex justify-content-center shadow">
-            <h4>Employee Self Service</h4>
-          </div>
+          
           <Outlet />
         </div>
       </div>

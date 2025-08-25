@@ -24,7 +24,7 @@ const Projects = () => {
             </div>
             <div className='mt-3'>
                 <table className='table table-bordered'>
-                    <thead className="table-dark">
+                    <thead className="table-light">
                         <tr>
                             <th>Name</th>
                             <th>Description</th>
@@ -43,8 +43,17 @@ const Projects = () => {
                                 <tr key={project.project_id}>
                                     <td>{project.name}</td>
                                     <td>{project.description}</td>
-                                    <td>{project.start_date}</td>
-                                    <td>{project.end_date || '—'}</td>
+                                    <td>{new Intl.DateTimeFormat('en-IN', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    }).format(new Date(project.start_date))
+                                    }</td>
+                                    <td>{new Intl.DateTimeFormat('en-IN', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        }).format(new Date(project.end_date))}</td>
                                     <td>{project.status}</td>
                                     <td>{project.dept_name || '—'}</td>
                                     <td>{project.manager_name || '—'}</td>

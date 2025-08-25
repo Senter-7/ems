@@ -15,7 +15,16 @@ con.connect(err => {
   if (err) {
     console.error("❌ MySQL connection error:", err);
   } else {
-    console.log("✅ Connected to Clever Cloud MySQL database.");
+    const isLocal = process.env.DB_HOST === 'localhost' || 
+                    process.env.DB_HOST === '127.0.0.1' ||
+                    process.env.DB_HOST?.includes('localhost');
+    
+    if (isLocal) {
+      console.log("Connected to Local MySQL database.");
+    } else {
+      console.log("Connected to Cloud MySQL database.");
+      console.log(`Database Host: ${process.env.DB_HOST}`);
+    }
   }
 });
 

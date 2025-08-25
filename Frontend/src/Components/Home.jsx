@@ -105,7 +105,7 @@ const Home = () => {
                   </button>
                   <button
                     className="btn btn-warning btn-sm" >
-                    Delete
+                    Remove
                   </button>
                   </td>
                 </tr>

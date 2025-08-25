@@ -17,6 +17,16 @@ const Dept = () => {
             }
         }).catch(err => console.log(err))
     }, [])
+
+    const formatBudget = (budget) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(budget || 0);
+    };
+
   return (
     <div className='px-5 mt-3'>
         <div className='d-flex justify-content-center'>
@@ -28,13 +38,17 @@ const Dept = () => {
                 <thead>
                     <tr>
                         <th>Name</th>
+                        <th>Members</th>
+                        <th>Total Budget</th>
                     </tr>
                 </thead>
                 <tbody>
                     {
                         dept.map(d => (
-                            <tr>
+                            <tr key={d.id}>
                                 <td>{d.name}</td>
+                                <td>{d.member_count || 0}</td>
+                                <td>{formatBudget(d.total_budget)}</td>
                             </tr>
                         ))
                     }

@@ -8,7 +8,7 @@ const Sidebar = ({ role, employee }) => {
 
   const handleLogout = () => {
     if (role === "admin") {
-      // For admin logout
+      
       axios.get(`${import.meta.env.VITE_API_URL}/auth/logout`).then((result) => {
         if (result.data.Status) {
           localStorage.removeItem("valid");
@@ -37,7 +37,7 @@ const Sidebar = ({ role, employee }) => {
           to="/dashboard"
           className="d-flex align-items-center pb-3 mb-md-1 mt-md-3 me-md-auto text-white text-decoration-none"
         >
-          <span className="fs-5 fw-bolder d-none d-sm-inline">HRMS</span>
+          <span className="fs-5 fw-bolder d-none d-sm-inline">Employee Management System</span>
         </Link>
         <ul className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100">
           <li className="w-100">
@@ -59,12 +59,7 @@ const Sidebar = ({ role, employee }) => {
             </Link>
           </li>
           
-          <li className="w-100">
-            <Link to="/dashboard/leave" className="nav-link text-white px-0 align-middle">
-              <i className="fs-4 bi-person ms-2"></i>
-              <span className="ms-2 d-none d-sm-inline">Leave</span>
-            </Link>
-          </li>
+          
           <li className="w-100">
             <Link to="/dashboard/projects" className="nav-link text-white px-0 align-middle">
               <i className="fs-4 bi-person ms-2"></i>
@@ -167,6 +162,12 @@ const Sidebar = ({ role, employee }) => {
               <i className="fs-4 bi-person-check ms-2"></i>
               <span className="ms-2 d-none d-sm-inline">Attendance</span>
             </span>
+          </li>
+          <li className="w-100">
+            <Link to="/hr_dashboard/leave" className="nav-link text-white px-0 align-middle">
+              <i className="fs-4 bi-person ms-2"></i>
+              <span className="ms-2 d-none d-sm-inline">Leave</span>
+            </Link>
           </li>
 
         

@@ -10,7 +10,7 @@ const ApproveLeave = () => {
 
   // Fetch departments on mount
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/auth/dept`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_API_URL}/hr/dept`, { withCredentials: true })
       .then(res => {
         if (res.data.Status) setDepartments(res.data.Result);
       });
@@ -20,7 +20,7 @@ const ApproveLeave = () => {
   useEffect(() => {
     if (!selectedDept) return;
     setLoading(true);
-    axios.get(`${import.meta.env.VITE_API_URL}/auth/leaves/${selectedDept}`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_API_URL}/hr/leaves/${selectedDept}`, { withCredentials: true })
       .then(res => {
         if (res.data.Status) setLeaves(res.data.Result);
         else setLeaves([]);
@@ -38,7 +38,7 @@ const ApproveLeave = () => {
 
   try {
     const res = await axios.post(
-      `${import.meta.env.VITE_API_URL}/auth/leave_action`,
+      `${import.meta.env.VITE_API_URL}/hr/leave_action`,
       { leave_id, status: action },
       { withCredentials: true }
     );
@@ -46,7 +46,7 @@ const ApproveLeave = () => {
     
     // Re-fetch to confirm server state (optional but recommended)
     const { data } = await axios.get(
-      `${import.meta.env.VITE_API_URL}/auth/leaves/${selectedDept}`, 
+      `${import.meta.env.VITE_API_URL}/hr/leaves/${selectedDept}`, 
       { withCredentials: true }
     );
     if (data.Status) setLeaves(data.Result);
@@ -122,8 +122,16 @@ const ApproveLeave = () => {
               leaves.map(leave => (
                 <tr key={leave.leave_id}>
                   <td className="px-4 py-3">{leave.employee_name}</td>
-                  <td className="px-4 py-3">{leave.start_date}</td>
-                  <td className="px-4 py-3">{leave.end_date}</td>
+                  <td className="px-4 py-3">{new Intl.DateTimeFormat('en-IN', {
+                                          day: '2-digit',
+                                          month: 'short',
+                                          year: 'numeric'
+                                        }).format(new Date(leave.start_date))}</td>
+                  <td className="px-4 py-3">{new Intl.DateTimeFormat('en-IN', {
+                                          day: '2-digit',
+                                          month: 'short',
+                                          year: 'numeric'
+                                        }).format(new Date(leave.end_date))}</td>
                   <td className="px-4 py-3">
                     {getDuration(leave.start_date, leave.end_date)}
                   </td>

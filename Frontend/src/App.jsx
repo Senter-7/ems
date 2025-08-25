@@ -24,6 +24,7 @@ import EmployeeDetail from './Components/EmployeeDetail'
 import PrivateRoute from './Components/PrivateRoute'
 import Leave from './Components/Leave'
 import ApproveLeave from './Components/ApproveLeave'
+
 import Projects from './Components/Projects'
 import AddProject from './Components/AddProjects';
 
@@ -48,12 +49,12 @@ function App() {
           
           <Route path='add_dept' element={<AddDept />} />
           <Route path='add_employee' element={<AddEmployee />} />
-          <Route path='leave' element={<ApproveLeave />} />
+          
           <Route path='projects' element={<Projects />} />
           <Route path='add_projects' element={<AddProject />} />
         </Route>
 
-        {/* HR Dashboard Routes */}
+        
         <Route path='/hr_dashboard' element={
           <PrivateRoute role="HR">
             <HRDashboard />
@@ -62,9 +63,10 @@ function App() {
           <Route path='hr_detail/:id' element={<EmployeeDetail />} />
           <Route path='setSalary/' element={<SetSalary />} />
           <Route path='attendance' element={<AttendanceTab />} />
+          <Route path='leave' element={<ApproveLeave />} />
         </Route>
 
-        {/* Employee Dashboard Routes */}
+        
         <Route path='/employee_dashboard' element={
           <PrivateRoute role="employee">
             <EmployeeDashboard />
