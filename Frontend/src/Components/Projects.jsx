@@ -17,24 +17,26 @@ const Projects = () => {
     }, [])
 
     return (
-        <div className='px-5 mt-3'>
-            <div className='d-flex justify-content-between align-items-center'>
-                <h3>Project List</h3>
-                <Link to="/dashboard/add_projects" className='btn btn-success'>Add Project</Link>
+        <div className='px-6 py-4'>
+            <div className='flex justify-between items-center mb-6'>
+                <h3 className='text-2xl font-semibold text-gray-800'>Project List</h3>
+                <Link to="/dashboard/add_projects" className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow'>
+                    Add Project
+                </Link>
             </div>
             <div className='mt-3'>
                 <table className='table table-bordered'>
                     <thead className="table-light">
                         <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                            <th>Department</th>
-                            <th>Manager</th>
-                            <th>Client</th>
-                            <th>Budget</th>
+                            <th className='px-4 py-3 text-left font-medium'>Name</th>
+                            <th className='px-4 py-3 text-left font-medium'>Description</th>
+                            <th className='px-4 py-3 text-left font-medium'>Start Date</th>
+                            <th className='px-4 py-3 text-left font-medium'>End Date</th>
+                            <th className='px-4 py-3 text-left font-medium'>Status</th>
+                            <th className='px-4 py-3 text-left font-medium'>Department</th>
+                            <th className='px-4 py-3 text-left font-medium'>Manager</th>
+                            <th className='px-4 py-3 text-left font-medium'>Client</th>
+                            <th className='px-4 py-3 text-left font-medium'>Budget</th>
                         </tr>
                     </thead>
                     <tbody>
